@@ -63,7 +63,7 @@ def addToken():
 		global transferwise_token
 		transferwise_token = t
 
-	return 'asdf'
+	return 'asdf '
 
 
 if __name__ == '__main__':
