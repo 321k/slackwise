@@ -62,7 +62,7 @@ def addToken():
 @app.route('/transferwise-token', methods=['POST'])
 def transferwiseToken():
 	t  = request.form.get('text')
-	if t is None:
+	if t is None or len(t)<5:
 		return 'Get a token <a href="http://moneytoemail.herokuapp.com/code">here</a>'
 	else:
 		global transferwise_token
