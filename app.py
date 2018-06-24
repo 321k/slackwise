@@ -8,6 +8,7 @@ from transferwiseclient.transferwiseclient import getTransferWiseProfileId, crea
 
 #Declare global variables
 global slack_token
+global transerwise_token
 
 #Environment variables
 is_prod = os.environ.get('IS_HEROKU', None)
@@ -48,9 +49,10 @@ def sendMessage():
 # Endpoint for adding verious tokens for local testing
 @app.route('/add-token')
 def addToken():
+	global transerwise_token
 	t  = request.args.get('transferwiseToken')
 	if t is not None:
-		session['transferwise_token'] = t
+		transerwise_token = t
 
 	s  = request.args.get('slackToken')
 	if s is not None:
@@ -71,6 +73,8 @@ def transferwiseToken():
 @app.route('/borderless', methods=['POST'])
 def borderless():
 	global slack_token
+	global transerwise_token
+	session['transferwise_token'] = transerwise_token
 	sc = SlackClient(slack_token)
 
 	profileId = getTransferWiseProfileId(isBusiness=False, access_token = session['transferwise_token'])
