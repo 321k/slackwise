@@ -1,4 +1,5 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, session
+
 import os
 import requests
 import json
@@ -7,7 +8,6 @@ from transferwiseclient.transferwiseclient import getTransferWiseProfileId, crea
 
 #Declare global variables
 global slack_token
-global transferwise_token
 
 #Environment variables
 is_prod = os.environ.get('IS_HEROKU', None)
@@ -28,6 +28,7 @@ def create_app():
 
 app = create_app()
 
+
 @app.route('/')
 def index():
 	return 'Hello world'
@@ -35,7 +36,7 @@ def index():
 @app.route('/send-message')
 def sendMessage():
 	sc = SlackClient(slack_token)
-	profile_id = getTransferWiseProfileId(isBusiness=False, access_token=transferwise_token)
+	profile_id = getTransferWiseProfileId(isBusiness=False, access_token=session['transferwise_token'])
 
 	x = sc.api_call(
 	  "chat.postMessage",
@@ -49,8 +50,7 @@ def sendMessage():
 def addToken():
 	t  = request.args.get('transferwiseToken')
 	if t is not None:
-		global transferwise_token
-		transferwise_token = t
+		session['transferwise_token'] = t
 
 	s  = request.args.get('slackToken')
 	if s is not None:
@@ -65,19 +65,17 @@ def transferwiseToken():
 	if t is None or len(t)<5:
 		return 'Get a token  here: http://moneytoemail.herokuapp.com/code'
 	else:
-		global transferwise_token
-		transferwise_token = t
+		session['transferwise_token'] = t
 	return 'Thank you, you can now interact with the slackwise bot'
 
 @app.route('/borderless', methods=['POST'])
 def borderless():
-	global transferwise_token
 	global slack_token
 	sc = SlackClient(slack_token)
 
-	profileId = getTransferWiseProfileId(isBusiness=False, access_token = transferwise_token)
-	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = transferwise_token)
-	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = transferwise_token)
+	profileId = getTransferWiseProfileId(isBusiness=False, access_token = session['transferwise_token'])
+	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = session['transferwise_token'])
+	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = session['transferwise_token'])
 
 	text="Your balances are \n"
 	for b in accounts['balances']:
