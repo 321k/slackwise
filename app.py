@@ -32,7 +32,11 @@ app = create_app()
 
 @app.route('/')
 def index():
-	return 'Hello world'
+	return render_template('index.html')
+
+@app.route('/slack')
+def index():
+	return redirect(url_for('index'))
 
 @app.route('/send-message')
 def sendMessage():
