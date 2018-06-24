@@ -30,6 +30,10 @@ app = create_app()
 
 @app.route('/')
 def index():
+	return 'Hello world'
+
+@app.route('/send-message')
+def index():
 	sc = SlackClient(slack_token)
 	profile_id = getTransferWiseProfileId(isBusiness=False, access_token=transferwise_token)
 
