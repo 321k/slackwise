@@ -78,14 +78,11 @@ def borderless():
 	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = transferwise_token)
 	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = transferwise_token)
 
+	text="Your balances are \n"
 	for b in accounts['balances']:
-		sc.api_call(
-			"chat.postMessage",
-			channel="general",
-			text=str(b['amount']['value']) + " " + str(b['amount']['currency'])
-			)
+		text+=str(b['amount']['value']) + " " + str(b['amount']['currency']) + "\n"
 
-	return str(accounts['balances'])
+	return text
 
 
 if __name__ == '__main__':
