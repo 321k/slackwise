@@ -3,7 +3,7 @@ import os
 import requests
 import json
 from slackclient import SlackClient
-from transferwiseclient.transferwiseclient import getTransferWiseProfileId, createTransferWiseRecipient, createTransferWiseQuote, createPayment, borderlessAccounts
+from transferwiseclient.transferwiseclient import getTransferWiseProfileId, createTransferWiseRecipient, createTransferWiseQuote, createPayment, getBorderlessAccountId, getBorderlessAccounts
 
 #Declare global variables
 global slack_token
@@ -57,7 +57,7 @@ def addToken():
 		global slack_token
 		slack_token = s
 
-	return redirect(url_for('index'))
+	return t + s
 
 @app.route('/transferwise-token', methods=['POST'])
 def transferwiseToken():
@@ -70,9 +70,22 @@ def transferwiseToken():
 
 @app.route('/borderless', methods=['POST'])
 def borderless():
-	profileId = getTransferWiseProfileId(business=False, access_token = transferwise_token)
-	b = borderlessAccounts(profileId)
-	return b
+	global transferwise_token
+	global slack_token
+	sc = SlackClient(slack_token)
+
+	profileId = getTransferWiseProfileId(isBusiness=False, access_token = transferwise_token)
+	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = transferwise_token)
+	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = transferwise_token)
+
+	for b in accounts['balances']:
+		sc.api_call(
+			"chat.postMessage",
+			channel="general",
+			text=str(b['amount']['value']) + " " + str(b['amount']['currency'])
+			)
+
+	return str(accounts['balances'])
 
 
 if __name__ == '__main__':

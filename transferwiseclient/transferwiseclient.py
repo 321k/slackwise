@@ -110,17 +110,16 @@ def redirectToPay(transferId):
   return redirect('https://transferwise.com/transferFlow#/transfer/' + requestId)
 
 
-def borderlessAccounts(profileId, access_token):
-  response = requests.post('https://api.transferwise.com/v1/borderless-accounts',
-                data = json.dumps({
-                  "profileId": profileId,
-                  }),
+def getBorderlessAccountId(profileId, access_token):
+  response = requests.get('https://api.transferwise.com/v1/borderless-accounts?profileId=' + str(profileId),
                 headers={
                    'Authorization': 'Bearer '+ access_token,
                    'Content-Type': 'application/json'})
+  return json.loads(response.text)[0]['id']
 
-  if transfer.status_code == 200:
-      return json.loads(response.text)
-
-  else:
-   return 'API call failed'
+def getBorderlessAccounts(borderlessId, access_token):
+  response = requests.get('https://api.transferwise.com/v1/borderless-accounts/' + str(borderlessId),
+                headers={
+                   'Authorization': 'Bearer '+ access_token,
+                   'Content-Type': 'application/json'})
+  return json.loads(response.text)
