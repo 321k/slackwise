@@ -57,7 +57,7 @@ def addToken():
 	return redirect(url_for('index'))
 
 @app.route('/transferwise-token', methods=['POST'])
-def addToken():
+def transferwiseToken():
 	t  = request.form.get('text')
 	if t is not None:
 		global transferwise_token
