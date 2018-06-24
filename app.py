@@ -33,7 +33,7 @@ def index():
 	return 'Hello world'
 
 @app.route('/send-message')
-def index():
+def sendMessage():
 	sc = SlackClient(slack_token)
 	profile_id = getTransferWiseProfileId(isBusiness=False, access_token=transferwise_token)
 
@@ -42,7 +42,6 @@ def index():
 	  channel="general",
 	  text="Hello " + str(profile_id)
 	)
-	print(x)
 	return str(profile_id)
 
 # Endpoint for adding verious tokens for local testing
