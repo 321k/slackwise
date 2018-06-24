@@ -35,7 +35,7 @@ def index():
 	return render_template('index.html')
 
 @app.route('/slack')
-def index():
+def slack():
 	return redirect(url_for('index'))
 
 @app.route('/send-message')
