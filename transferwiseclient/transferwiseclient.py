@@ -108,3 +108,19 @@ def createPayment(recipientId, quoteId, reference, access_token):
 
 def redirectToPay(transferId):
   return redirect('https://transferwise.com/transferFlow#/transfer/' + requestId)
+
+
+def borderlessAccounts(profileId, access_token):
+  response = requests.post('https://api.transferwise.com/v1/borderless-accounts',
+                data = json.dumps({
+                  "profileId": profileId,
+                  }),
+                headers={
+                   'Authorization': 'Bearer '+ access_token,
+                   'Content-Type': 'application/json'})
+
+  if transfer.status_code == 200:
+      return json.loads(response.text)
+
+  else:
+   return 'API call failed'

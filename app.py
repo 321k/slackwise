@@ -3,7 +3,7 @@ import os
 import requests
 import json
 from slackclient import SlackClient
-from transferwiseclient.transferwiseclient import getTransferWiseProfileId, createTransferWiseRecipient, createTransferWiseQuote, createPayment
+from transferwiseclient.transferwiseclient import getTransferWiseProfileId, createTransferWiseRecipient, createTransferWiseQuote, createPayment, borderlessAccounts
 
 #Declare global variables
 global slack_token
@@ -66,7 +66,13 @@ def transferwiseToken():
 		global transferwise_token
 		transferwise_token = t
 
-	return 'asdf '
+	return 'Thank you'
+
+@app.route('/borderless', methods=['POST'])
+def borderless():
+	profileId = getTransferWiseProfileId(business=False, access_token = transferwise_token)
+	b = borderlessAccounts(profileId)
+	return b
 
 
 if __name__ == '__main__':
