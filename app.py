@@ -62,11 +62,12 @@ def addToken():
 @app.route('/transferwise-token', methods=['POST'])
 def transferwiseToken():
 	t  = request.form.get('text')
-	if t is not None:
+	if t is None:
+		return 'Get a token <a href="http://moneytoemail.herokuapp.com/code">here</a>'
+	else:
 		global transferwise_token
 		transferwise_token = t
-
-	return 'Thank you'
+	return 'Thank you, you can now interact with the slackwise bot'
 
 @app.route('/borderless', methods=['POST'])
 def borderless():
