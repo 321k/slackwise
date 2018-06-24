@@ -1,0 +1,4 @@
+Flask==0.12.1
+requests==2.13.0
+slackclient==1.2.1
+uuid==1.30
