@@ -63,7 +63,7 @@ def addToken():
 def transferwiseToken():
 	t  = request.form.get('text')
 	if t is None or len(t)<5:
-		return 'Get a token <a href="http://moneytoemail.herokuapp.com/code">here</a>'
+		return 'Get a token  here: http://moneytoemail.herokuapp.com/code'
 	else:
 		global transferwise_token
 		transferwise_token = t
