@@ -22,6 +22,6 @@ class User(BaseModel):
 	transferwise_token = db.Column(db.String(120))
 	date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-	def __init__(self, slack_token):
+	def __init__(self, transferwise_token):
 		self.slack_token = slack_token
 		self.transferwise_token = transferwise_token
