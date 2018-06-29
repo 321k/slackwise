@@ -62,25 +62,36 @@ def index():
 
 @app.route('/slack')
 def slack():
-	code = request.args.get('code')
-	payload = {'client_id': '387079239778.387986429910', 
-	'client_secret': '12df7e70460efc4c8c6e8a1cea961612',
-	'code': code}
-	oauth = requests.get('https://slack.com/api/oauth.access',
-		params = payload,
-		headers={
-                 'Content-Type': 'application/x-www-form-urlencoded'})
-	token = json.loads(oauth.text)['access_token']
-	session['slack_token'] = token
-	user = User.query.filter_by(slack_token=token).first()
+	if is_prod == 'True':
+		code = request.args.get('code')
+		payload = {'client_id': '387079239778.387986429910', 
+		'client_secret': '12df7e70460efc4c8c6e8a1cea961612',
+		'code': code}
+		response = requests.get('https://slack.com/api/oauth.access',
+			params = payload,
+			headers={
+	                 'Content-Type': 'application/x-www-form-urlencoded'})
+		oauth = json.loads(response.text)
 
-	if user is None:
-		user = User(slack_token = token)
-		db.session.add(user)
-		db.session.commit()
+	else is_prod is None:
+		oauth = {'access_token': 'xoxp-XXXXXXXX-XXXXXXXX-XXXXX','scope': 'groups:write', 'team_name': 'TransferWise', 'team_id': 'TXXXXXXXXX' }
+
+	if 'error' in oauth:
+		return 'Failed to authenticate'
+
+	else:
+		token = oauth['access_token']
+		print(token)
+		session['slack_token'] = token
 		user = User.query.filter_by(slack_token=token).first()
 
-	return redirect(url_for('index'))
+		if user is None:
+			user = User(slack_token = token)
+			db.session.add(user)
+			db.session.commit()
+			user = User.query.filter_by(slack_token=token).first()
+
+		return redirect(url_for('index'))
 
 @app.route('/send-message')
 def sendMessage():
@@ -113,22 +124,23 @@ def addToken():
 def transferwiseToken():
 
 	token  = request.form.get('text')
-	session['transferwise_token'] = token
 
 	user = User.query.filter_by(slack_token=token).first()
 
 	if user is None:
 		user = User(transferwise_token = token)
 		db.session.add(user)
-		session.commit()
+		db.session.commit()
 	else:	
 		user.transferwise_token = token
-		session.commit()
+		db.session.commit()
 
 	if token is None or len(token)<5:
 		return 'Get a token  here: http://moneytoemail.herokuapp.com/code'
 	else:
 		transferwise_token = token
+
+	session['transferwise_token'] = token
 	return 'Thank you, you can now interact with the slackwise bot'
 
 @app.route('/borderless', methods=['POST'])
