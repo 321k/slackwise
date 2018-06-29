@@ -79,7 +79,7 @@ def slack():
 		db.session.commit()
 		user = User.query.filter_by(slack_token=token).first()
 
-	return redirect(url_for(index))
+	return redirect(url_for('index'))
 
 @app.route('/send-message')
 def sendMessage():
