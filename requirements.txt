@@ -3,3 +3,6 @@ requests==2.13.0
 slackclient==1.2.1
 uuid==1.30
 Flask-Script==2.0.6
+psycopg2==2.6.1
+Flask-SQLAlchemy===2.1
+Flask-Migrate==1.8.0
