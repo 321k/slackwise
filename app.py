@@ -71,6 +71,7 @@ def slack():
 		headers={
                  'Content-Type': 'application/x-www-form-urlencoded'})
 	token = json.loads(oauth.text)['access_token']
+	session['slack_token'] = token
 	user = User.query.filter_by(slack_token=token).first()
 
 	if user is None:
@@ -110,12 +111,24 @@ def addToken():
 
 @app.route('/transferwise-token', methods=['POST'])
 def transferwiseToken():
-	global transferwise_token
-	t  = request.form.get('text')
-	if t is None or len(t)<5:
+
+	token  = request.form.get('text')
+	session['transferwise_token'] = token
+
+	user = User.query.filter_by(slack_token=token).first()
+
+	if user is None:
+		user = User(slack_token = token)
+		db.session.add(user)
+		session.commit()
+	else:	
+		user.transferwise_token = token
+		session.commit()
+
+	if token is None or len(token)<5:
 		return 'Get a token  here: http://moneytoemail.herokuapp.com/code'
 	else:
-		transferwise_token = t
+		transferwise_token = token
 	return 'Thank you, you can now interact with the slackwise bot'
 
 @app.route('/borderless', methods=['POST'])
