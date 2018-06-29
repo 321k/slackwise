@@ -33,7 +33,7 @@ app = create_app()
 #Congiguring database
 if is_prod == 'True':
   POSTGRES = {
-      'user': 'adekzcuolytxxv',
+      'user': 'pkarwhotjkxyjt',
       'pw': os.environ.get('PG_PASSWORD', None),
       'db': 'd2ta6fjdj5k607',
       'host': 'ec2-54-235-196-250.compute-1.amazonaws.com',
