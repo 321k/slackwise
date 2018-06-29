@@ -73,7 +73,7 @@ def slack():
 	                 'Content-Type': 'application/x-www-form-urlencoded'})
 		oauth = json.loads(response.text)
 
-	else is_prod is None:
+	else:
 		oauth = {'access_token': 'xoxp-XXXXXXXX-XXXXXXXX-XXXXX','scope': 'groups:write', 'team_name': 'TransferWise', 'team_id': 'TXXXXXXXXX' }
 
 	if 'error' in oauth:
