@@ -36,7 +36,15 @@ def index():
 
 @app.route('/slack')
 def slack():
-	return redirect(url_for('index'))
+	code = request.args.get('code')
+	payload = {'client_id': '387079239778.387986429910', 
+	'client_secret': '12df7e70460efc4c8c6e8a1cea961612',
+	'code': code}
+	oauth = requests.get('https://slack.com/api/oauth.access',
+		params = payload,
+		headers={
+                 'Content-Type': 'application/x-www-form-urlencoded'})
+	return str(oauth)
 
 @app.route('/send-message')
 def sendMessage():
