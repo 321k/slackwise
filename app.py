@@ -118,7 +118,7 @@ def transferwiseToken():
 	user = User.query.filter_by(slack_token=token).first()
 
 	if user is None:
-		user = User(slack_token = token)
+		user = User(transferwise_token = token)
 		db.session.add(user)
 		session.commit()
 	else:	
