@@ -46,7 +46,7 @@ else:
       'pw': '',
       'db': 'slackwise',
       'host': 'localhost',
-      'port': '5432',
+      'port': '5433',
   }
   static_url = 'localhost:5000'
 
