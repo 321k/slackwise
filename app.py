@@ -5,6 +5,7 @@ import requests
 import json
 from slackclient import SlackClient
 from transferwiseclient.transferwiseclient import getTransferWiseProfileId, createTransferWiseRecipient, createTransferWiseQuote, createPayment, getBorderlessAccountId, getBorderlessAccounts
+from model import db, User
 
 #Declare global variables
 global slack_token
@@ -29,6 +30,31 @@ def create_app():
 
 app = create_app()
 
+#Congiguring database
+if is_prod == 'True':
+  POSTGRES = {
+      'user': 'adekzcuolytxxv',
+      'pw': os.environ.get('PG_PASSWORD', None),
+      'db': 'd2ta6fjdj5k607',
+      'host': 'ec2-54-235-196-250.compute-1.amazonaws.com',
+      'port': '5432',
+  }
+  static_url = 'http://slackwise.herokuapp.com'
+else:
+  POSTGRES = {
+      'user': 'erik.johansson',
+      'pw': '',
+      'db': 'slackwise',
+      'host': 'localhost',
+      'port': '5433',
+  }
+  static_url = 'localhost:5000'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
+%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
+db.init_app(app)
+
+port = int(os.environ.get('PORT', 5000))
 
 @app.route('/')
 def index():
@@ -44,7 +70,8 @@ def slack():
 		params = payload,
 		headers={
                  'Content-Type': 'application/x-www-form-urlencoded'})
-	return str(oauth)
+	token = json.loads(oauth)['access_token']
+	return redirect(str(token))
 
 @app.route('/send-message')
 def sendMessage():
