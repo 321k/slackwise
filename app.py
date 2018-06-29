@@ -70,8 +70,9 @@ def slack():
 		params = payload,
 		headers={
                  'Content-Type': 'application/x-www-form-urlencoded'})
-	token = json.loads(oauth)['access_token']
-	return redirect(str(token))
+	token = json.loads(oauth.text)['access_token']
+	user = User.query.filter_by(slack_token=token).first()
+	return user
 
 @app.route('/send-message')
 def sendMessage():
