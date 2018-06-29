@@ -72,7 +72,14 @@ def slack():
                  'Content-Type': 'application/x-www-form-urlencoded'})
 	token = json.loads(oauth.text)['access_token']
 	user = User.query.filter_by(slack_token=token).first()
-	return user
+
+	if user is None:
+		user = User(slack_token = token)
+		db.session.add(user)
+		db.session.commit()
+		user = User.query.filter_by(slack_token=token).first()
+
+	return redirect(url_for(index))
 
 @app.route('/send-message')
 def sendMessage():
