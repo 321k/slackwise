@@ -134,31 +134,31 @@ def addToken():
 
 @app.route('/transferwise-token', methods=['POST'])
 def transferwiseToken():
-
 	token  = request.form.get('text')
 
-	user = User.query.filter_by(slack_token=token).first()
+	if token is None or len(token)<5:
+		return 'Get a token  here: http://moneytoemail.herokuapp.com/code'
+
+	if is_prod == 'True':	
+		slack_id = request.form.get('user_id')
+	else:
+		slack_id = 'UBCUSHSNP'
+	
+	user = User.query.filter_by(slack_id=slack_id).first()
 
 	if user is None:
-		user = User(transferwise_token = token)
-		db.session.add(user)
-		db.session.commit()
+		return "Please connect your account first"
 	else:	
 		user.transferwise_token = token
 		db.session.commit()
 
-	if token is None or len(token)<5:
-		return 'Get a token  here: http://moneytoemail.herokuapp.com/code'
-	else:
-		transferwise_token = token
-
-	session['transferwise_token'] = token
 	return 'Thank you, you can now interact with the slackwise bot'
 
 @app.route('/borderless', methods=['POST'])
 def borderless():
 
 	user_id = request.form.get('user_id')
+
 	print(user_id)
 	user = User.query.first()
 
