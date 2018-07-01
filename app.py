@@ -66,7 +66,7 @@ def slack():
 		code = request.args.get('code')
 		payload = {'client_id': '387079239778.387986429910', 
 		'client_secret': '12df7e70460efc4c8c6e8a1cea961612',
-		'scope':'users.profile:read',
+		'scope':'users.profile:read+identity.basic',
 		'code': code}
 		response = requests.get('https://slack.com/api/oauth.access',
 			params = payload,
