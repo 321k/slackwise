@@ -66,6 +66,7 @@ def slack():
 		code = request.args.get('code')
 		payload = {'client_id': '387079239778.387986429910', 
 		'client_secret': '12df7e70460efc4c8c6e8a1cea961612',
+		'scope':'users.profile:read',
 		'code': code}
 		response = requests.get('https://slack.com/api/oauth.access',
 			params = payload,
@@ -74,7 +75,7 @@ def slack():
 		oauth = json.loads(response.text)
 
 	else:
-		oauth = {'access_token': 'xoxp-XXXXXXXX-XXXXXXXX-XXXXX','scope': 'groups:write', 'team_name': 'TransferWise', 'team_id': 'TXXXXXXXXX' }
+		oauth = {'access_token': 'xoxp-XXXXXXXX-XXXXXXXX-XXXXX','scope': 'users.profile:read', 'team_name': 'TransferWise', 'team_id': 'TXXXXXXXXX' }
 
 	if 'error' in oauth:
 		return 'Failed to authenticate'
