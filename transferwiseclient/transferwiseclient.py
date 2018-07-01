@@ -4,17 +4,16 @@ import json
 
 def getTransferWiseProfileId(isBusiness, access_token):
   profiles = requests.get('https://api.transferwise.com/v1/profiles',
-             headers={
-                 'Authorization': 'Bearer '+ access_token,
-                 'Content-Type': 'application/json'})
-
+    headers={
+    'Authorization': 'Bearer '+ access_token,
+    'Content-Type': 'application/json'})
   if profiles.status_code == 200:
     if isBusiness == True:
       return json.loads(profiles.text)[1]['id']
-
     else:
       return json.loads(profiles.text)[0]['id']
-
+  elif profiles.status_code == 401:
+    return json.loads(profiles.text)['error']
   else:
     return 'Failed to get profile'
 
@@ -36,6 +35,9 @@ def createTransferWiseRecipient(email, currency, name, legalType, profileId, acc
 
   if recipient.status_code == 200:
       return json.loads(recipient.text)['id']
+
+  elif recipient.status_code == 401:
+    return json.loads(profiles.text)['error']
 
   else:
    return 'Failed to create recipient'
@@ -79,7 +81,10 @@ def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, transferT
    return "Something went wrong"
 
   if quote.status_code == 200:
-      return json.loads(quote.text)['id']
+    return json.loads(quote.text)['id']
+
+  elif quote.status_code == 401:
+    return json.loads(profiles.text)['error']
 
   else:
    return 'Failed to create quote'
