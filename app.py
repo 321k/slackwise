@@ -122,7 +122,17 @@ def transferwiseToken():
 	token  = request.form.get('text')
 
 	if token is None or len(token)<5:
-		return 'Get a token  here: http://moneytoemail.herokuapp.com/code'
+		user = User.query.filter_by(slack_id=slack_id).first()
+		if user is None:
+			return 'Connect your account here: http://slackwise.herokuapp.com'
+
+		elif user.transferwise_token is not None:
+			profileId = getTransferWiseProfileId(isBusiness = False, access_token = user.transferwise_token)
+			if profileId == 'Failed to get profile':
+				return 'Your token is old, get a new one at http://moneytoemail.herokuapp.com/code and use "/transferwise token" to update'
+		
+		else:
+			return 'Get a token here: http://moneytoemail.herokuapp.com/code'
 
 	if is_prod == 'True':	
 		slack_id = request.form.get('user_id')
@@ -237,6 +247,10 @@ def pay():
 	print('Name: ' + name)
 
 	recipientId = createTransferWiseRecipient(email = recipient.email, currency = currency, name = name, legalType='PRIVATE', profileId = profileId, access_token = user.transferwise_token)
+
+	if recipientId == 'Failed to create recipient':
+		return 'Your token is old, get a new one at http://moneytoemail.herokuapp.com/code and use "/transferwise token" to update'
+
 	print("Recipient ID: " + str(recipientId))
 
 	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = user.transferwise_token)
