@@ -132,7 +132,7 @@ def addToken():
 
 	return t + s
 
-@app.route('/transferwise-token', methods=['POST'])
+@app.route('/transferwise', methods=['POST'])
 def transferwiseToken():
 	token  = request.form.get('text')
 
@@ -154,7 +154,7 @@ def transferwiseToken():
 
 	return 'Thank you, you can now interact with the slackwise bot'
 
-@app.route('/borderless', methods=['POST'])
+@app.route('/balances', methods=['POST'])
 def borderless():
 
 	if is_prod == 'True':
@@ -194,6 +194,38 @@ def borderless():
 
 	return text
 
+@app.route('/pay', methods=['POST'])
+def pay():
+	payment  = request.form.get('text')
+	print(str(payment))
+
+	if is_prod == 'True':
+		slack_id = request.form.get('user_id')
+		print("Live slack ID: " + str (slack_id))
+	else:
+		slack_id = 'UBCUSHSNP'
+		print("Test slack ID: " + str(slack_id))
+
+	user = User.query.filter_by(slack_id=slack_id).first()
+
+	if user is None:
+		return 'Please connect your Slack account first from slackwise.herokuapp.com'
+	elif user.slack_token is None:
+		return 'Please connect your Slack account first from slackwise.herokuapp.com'
+	elif user.transferwise_token is None:
+		return 'Please connect your TransferWise account first using /transferwise'
+
+	print("Slack token: " + str(user.slack_token))
+	print("TransferWise token: " + str(user.transferwise_token))
+	
+	profileId = getTransferWiseProfileId(isBusiness=False, access_token = user.transferwise_token)
+	print("Profile ID: " + str(profileId))
+
+	if profileId == 'invalid_token':
+		return "Please update your TransferWise token first using /transferwise"
+
+	return 'Successful'
+	
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=port)
