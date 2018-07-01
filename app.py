@@ -73,48 +73,49 @@ def slack():
 			headers={
 	                 'Content-Type': 'application/x-www-form-urlencoded'})
 		oauth = json.loads(response.text)
+		print(str(oauth['ok']))
 
 	else:
 		oauth = {'access_token': 'xoxp-XXXXXXXX-XXXXXXXX-XXXXX','scope': 'users.profile:read', 'team_name': 'TransferWise', 'team_id': 'TXXXXXXXXX' }
 
 	if 'error' in oauth:
-		return 'Failed to authenticate'
+		print('Failed to authenticate to Slack')
+		return 'Failed to authenticate to Slack'
 
-	else:
-		token = oauth['access_token']
-		session['slack_token'] = token
+	token = oauth['access_token']
+	print("Slack token: " + token)
 
-		payload = {'token': token}
-		response = requests.get('https://slack.com/api/users.identity',
-			params = payload,
-			headers={
-	                 'Content-Type': 'application/x-www-form-urlencoded'})
-		userIdentity = json.loads(response.text)
-		print('Success: ' + str(userIdentity['ok']))
-		
-		if userIdentity['ok'] == True:
-			user = User.query.filter_by(slack_token=token).first()
-			if user is None:
-				user = User(slack_token = token, slack_id = userIdentity['user']['id'])
-				db.session.add(user)
+	payload = {'token': token}
+	response = requests.get('https://slack.com/api/users.identity',
+		params = payload,
+		headers={
+                 'Content-Type': 'application/x-www-form-urlencoded'})
+	userIdentity = json.loads(response.text)
+	print('Success: ' + str(userIdentity['ok']))
+	
+	if userIdentity['ok'] == True:
+		user = User.query.filter_by(slack_token=token).first()
+		if user is None:
+			user = User(slack_token = token, slack_id = userIdentity['user']['id'])
+			db.session.add(user)
+			db.session.commit()
+
+		elif user.slack_id is None:
+			user.slack_id = userIdentity['user']['id']
+			db.session.commit()
+
+		if user.email is None:
+			payload = {'token': token, 'user': user.slack_id}
+			response = requests.get('https://slack.com/api/users.profile.get',
+				params = payload,
+				headers={
+				'Content-Type': 'application/x-www-form-urlencoded'})
+			userProfile = json.loads(response.text)
+			if userProfile['ok']==True:
+				user.email = userProfile['profile']['email']
 				db.session.commit()
 
-			elif user.slack_id is None:
-				user.slack_id = userIdentity['user']['id']
-				db.session.commit()
-
-			if user.email is None:
-				payload = {'token': token, 'user': user.slack_id}
-				response = requests.get('https://slack.com/api/users.profile.get',
-					params = payload,
-					headers={
-					'Content-Type': 'application/x-www-form-urlencoded'})
-				userProfile = json.loads(response.text)
-				if userProfile['ok']==True:
-					user.email = userProfile['profile']['email']
-					db.session.commit()
-
-		return redirect(url_for('index'))
+	return redirect(url_for('index'))
 
 @app.route('/transferwise', methods=['POST'])
 def transferwiseToken():
