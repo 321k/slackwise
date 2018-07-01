@@ -103,7 +103,7 @@ def slack():
 				user.slack_id = userIdentity['user']['id']
 				db.session.commit()
 
-			if use.email is None:
+			if user.email is None:
 				payload = {'token': token, 'user': user.slack_id}
 				response = requests.get('https://slack.com/api/users.profile.get',
 					params = payload,
