@@ -103,34 +103,18 @@ def slack():
 				user.slack_id = userIdentity['user']['id']
 				db.session.commit()
 
+			if use.email is None:
+				payload = {'token': token, 'user': user.slack_id}
+				response = requests.get('https://slack.com/api/users.profile.get',
+					params = payload,
+					headers={
+					'Content-Type': 'application/x-www-form-urlencoded'})
+				userProfile = json.loads(response.text)
+				if userProfile['ok']==True:
+					user.email = userProfile['profile']['email']
+					db.session.commit()
+
 		return redirect(url_for('index'))
-
-@app.route('/send-message')
-def sendMessage():
-	sc = SlackClient(slack_token)
-	profile_id = getTransferWiseProfileId(isBusiness=False, access_token=session['transferwise_token'])
-
-	x = sc.api_call(
-	  "chat.postMessage",
-	  channel="general",
-	  text="Hello " + str(profile_id)
-	)
-	return str(profile_id)
-
-# Endpoint for adding verious tokens for local testing
-@app.route('/add-token')
-def addToken():
-	global transferwise_token
-	t  = request.args.get('transferwiseToken')
-	if t is not None:
-		transferwise_token = t
-
-	s  = request.args.get('slackToken')
-	if s is not None:
-		global slack_token
-		slack_token = s
-
-	return t + s
 
 @app.route('/transferwise', methods=['POST'])
 def transferwiseToken():
