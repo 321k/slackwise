@@ -186,7 +186,7 @@ def pay():
 
 	if is_prod == 'True':
 		slack_id = request.form.get('user_id')
-		print("Live slack ID: " + str (slack_id))
+		print("Live slack ID: " + str(slack_id))
 	else:
 		slack_id = 'UBCUSHSNP'
 		print("Test slack ID: " + str(slack_id))
@@ -208,6 +208,53 @@ def pay():
 
 	if profileId == 'invalid_token':
 		return "Please update your TransferWise token first using /transferwise"
+
+	payment = payment.split(' ')
+
+	if len(payment) < 3:
+		return 'Please use the format /pay @user amount currency'
+
+	if len(payment[0].split('@')) < 2:
+		return 'Please specify a Slack user'
+	else:
+		recipient_slack_id = payment[0].split('@')[1].split("|")[0]
+		print('Recipient slack ID: ' + str(recipient_slack_id))
+
+	amount = payment[1]
+	print('Amount: ' + str(amount))
+
+	currency = payment[2]
+	print('Currency: ' + str(currency))
+
+	recipient = User.query.filter_by(slack_id=recipient_slack_id).first()
+
+	first_name = recipient.email.split('@')[0].split('.')[0]
+	last_name = recipient.email.split('@')[0].split('.')[1]
+	if len(last_name)<3:
+		last_name = first_name
+
+	name = first_name + ' ' + last_name
+	print('Name: ' + name)
+
+	recipientId = createTransferWiseRecipient(email = recipient.email, currency = currency, name = name, legalType='PRIVATE', profileId = profileId, access_token = user.transferwise_token)
+	print("Recipient ID: " + str(recipientId))
+
+	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = user.transferwise_token)
+	print("Borderless ID: " + str(borderlessId))
+
+	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = user.transferwise_token)
+	sourceCurrency = accounts['balances'][0]['amount']['currency']
+	print("Source currency: " + str(sourceCurrency))
+
+	quoteId = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, transferType = 'EMAIL', access_token = user.transferwise_token, targetAmount = amount)
+
+	transferId = createPayment(recipientId = recipientId, quoteId = quoteId, reference = 'Slackwise', access_token = user.transferwise_token)
+
+	if transferId == 'Failed to create transfer':
+		return "Failed to pay"
+
+	else:
+		return 'Click here to pay: https://transferwise.com/transferFlow#/transfer/' + requestId
 
 	return 'Successful'
 	
