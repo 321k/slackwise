@@ -90,8 +90,9 @@ def slack():
 			headers={
 	                 'Content-Type': 'application/x-www-form-urlencoded'})
 		userIdentity = json.loads(response.text)
+		print('Success: ' + userIdentity['ok'])
 		
-		if userIdentity['ok'] == 'true':
+		if userIdentity['ok'] == True:
 			user = User.query.filter_by(slack_token=token).first()
 			if user is None:
 				user = User(slack_token = token, slack_id = userIdentity['user']['id'])
