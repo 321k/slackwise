@@ -82,15 +82,25 @@ def slack():
 
 	else:
 		token = oauth['access_token']
-		print(token)
 		session['slack_token'] = token
-		user = User.query.filter_by(slack_token=token).first()
 
-		if user is None:
-			user = User(slack_token = token)
-			db.session.add(user)
-			db.session.commit()
+		payload = {'token': token}
+		response = requests.get('https://slack.com/api/users.identity',
+			params = payload,
+			headers={
+	                 'Content-Type': 'application/x-www-form-urlencoded'})
+		userIdentity = json.loads(response.text)
+		
+		if userIdentity['ok'] == 'true':
 			user = User.query.filter_by(slack_token=token).first()
+			if user is None:
+				user = User(slack_token = token, slack_id = userIdentity['user']['id'])
+				db.session.add(user)
+				db.session.commit()
+
+			elif user.slack_id is None:
+				user.slack_id = userIdentity['user']['id']
+				db.session.commit()
 
 		return redirect(url_for('index'))
 
