@@ -159,10 +159,10 @@ def borderless():
 
 	if is_prod == 'True':
 		slack_id = request.form.get('user_id')
+		print("Live slack ID: " + str (slack_id))
 	else:
 		slack_id = 'UBCUSHSNP'
-	
-	print(slack_id)
+		print("Test slack ID: " + str(slack_id))
 
 	user = User.query.filter_by(slack_id=slack_id).first()
 
@@ -173,7 +173,8 @@ def borderless():
 	elif user.transferwise_token is None:
 		return 'Please connect your TransferWise account first using /transferwise'
 
-	sc = SlackClient(user.slack_token)
+	print("Slack token: " + str(user.slack_token))
+	#sc = SlackClient(user.slack_token)
 
 	profileId = getTransferWiseProfileId(isBusiness=False, access_token = user.transferwise_token)
 	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = user.transferwise_token)
