@@ -145,10 +145,12 @@ def transferwiseToken():
 
 @app.route('/borderless', methods=['POST'])
 def borderless():
-	global slack_token
-	global transferwise_token
-	session['transferwise_token'] = transferwise_token
-	sc = SlackClient(slack_token)
+
+	user_id = request.form.get('user_id')
+	print(user_id)
+	user = User.query.first()
+
+	sc = SlackClient(user.slack_token)
 
 	profileId = getTransferWiseProfileId(isBusiness=False, access_token = session['transferwise_token'])
 	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = session['transferwise_token'])
