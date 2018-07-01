@@ -157,16 +157,27 @@ def transferwiseToken():
 @app.route('/borderless', methods=['POST'])
 def borderless():
 
-	user_id = request.form.get('user_id')
+	if is_prod == 'True':
+		slack_id = request.form.get('user_id')
+	else:
+		slack_id = 'UBCUSHSNP'
+	
+	print(slack_id)
 
-	print(user_id)
-	user = User.query.first()
+	user = User.query.filter_by(slack_id=slack_id).first()
+
+	if user is None:
+		return 'Please connect your Slack account first from slackwise.herokuapp.com'
+	elif user.slack_token is None:
+		return 'Please connect your Slack account first from slackwise.herokuapp.com'
+	elif user.transferwise_token is None:
+		return 'Please connect your TransferWise account first using /transferwise'
 
 	sc = SlackClient(user.slack_token)
 
-	profileId = getTransferWiseProfileId(isBusiness=False, access_token = session['transferwise_token'])
-	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = session['transferwise_token'])
-	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = session['transferwise_token'])
+	profileId = getTransferWiseProfileId(isBusiness=False, access_token = user.transferwise_token)
+	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = user.transferwise_token)
+	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = user.transferwise_token)
 
 	text="Your balances are \n"
 	for b in accounts['balances']:
