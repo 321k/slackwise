@@ -180,6 +180,9 @@ def borderless():
 	profileId = getTransferWiseProfileId(isBusiness=False, access_token = user.transferwise_token)
 	print("Profile ID: " + str(profileId))
 
+	if profileId == 'invalid_token':
+		return "Please update your TransferWise token first using /transferwise"
+	
 	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = user.transferwise_token)
 	print("Borderless ID: " + str(borderlessId))
 
