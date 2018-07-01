@@ -121,8 +121,14 @@ def slack():
 def transferwiseToken():
 	token  = request.form.get('text')
 
-	if token is None or len(token)<5:
-		user = User.query.filter_by(slack_id=slack_id).first()
+	if is_prod == 'True':	
+		slack_id = request.form.get('user_id')
+	else:
+		slack_id = 'UBCUSHSNP'
+	
+	user = User.query.filter_by(slack_id=slack_id).first()
+	
+	if token is None or len(token)<5:	
 		if user is None:
 			return 'Connect your account here: http://slackwise.herokuapp.com'
 
@@ -133,13 +139,6 @@ def transferwiseToken():
 		
 		else:
 			return 'Get a token here: http://moneytoemail.herokuapp.com/code'
-
-	if is_prod == 'True':	
-		slack_id = request.form.get('user_id')
-	else:
-		slack_id = 'UBCUSHSNP'
-	
-	user = User.query.filter_by(slack_id=slack_id).first()
 
 	if user is None:
 		return "Please connect your account first"
