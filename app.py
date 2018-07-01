@@ -174,10 +174,15 @@ def borderless():
 		return 'Please connect your TransferWise account first using /transferwise'
 
 	print("Slack token: " + str(user.slack_token))
+	print("TransferWise token: " + str(user.transferwise_token))
 	#sc = SlackClient(user.slack_token)
 
 	profileId = getTransferWiseProfileId(isBusiness=False, access_token = user.transferwise_token)
+	print("Profile ID: " + str(profileId))
+
 	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = user.transferwise_token)
+	print("Borderless ID: " + str(borderlessId))
+
 	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = user.transferwise_token)
 
 	text="Your balances are \n"
