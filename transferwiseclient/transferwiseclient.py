@@ -40,44 +40,36 @@ def createTransferWiseRecipient(email, currency, name, legalType, profileId, acc
 def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, transferType, access_token, sourceAmount=None, targetAmount=None):
   if sourceAmount is None and targetAmount is None:
     return "Specify sourceAmount or targetAmount"
-
   elif sourceAmount is not None and targetAmount is not None:
     return "Specify only sourceAmount or targetAmount"
-
   elif sourceAmount is not None and targetAmount is None:
     quote = requests.post('https://api.transferwise.com/v1/quotes',
-                              data = json.dumps({
-                              'profile': profileId,
-                              'source': sourceCurrency,
-                              'target': targetCurrency,
-                              'rateType': 'FIXED',
-                              'sourceAmount': sourceAmount,
-                              'type': transferType
-                              }),
-                              headers={
-                                'Authorization': 'Bearer '+ access_token,
-                                'Content-Type': 'application/json'})
-
+      data = json.dumps({
+      'source': sourceCurrency,
+      'target': targetCurrency,
+      'rateType': 'FIXED',
+      'sourceAmount': sourceAmount,
+      'type': transferType
+      }),
+      headers={
+      'Authorization': 'Bearer '+ access_token,
+      'Content-Type': 'application/json'})
   elif sourceAmount is None and targetAmount is not None:
     quote = requests.post('https://api.transferwise.com/v1/quotes',
-                              data = json.dumps({
-                              'profile': profileId,
-                              'source': sourceCurrency,
-                              'target': targetCurrency,
-                              'rateType': 'FIXED',
-                              'targetAmount': targetAmount,
-                              'type': transferType
-                              }),
-                              headers={
-                                'Authorization': 'Bearer '+ access_token,
-                                'Content-Type': 'application/json'})
-
+      data = json.dumps({
+      'source': sourceCurrency,
+      'target': targetCurrency,
+      'rateType': 'FIXED',
+      'targetAmount': targetAmount,
+      'type': transferType
+      }),
+      headers={
+      'Authorization': 'Bearer '+ access_token,
+      'Content-Type': 'application/json'})
   else:
    return "Something went wrong"
-
   if quote.status_code == 200:
     return json.loads(quote.text)['id']
-
   else:
     return json.loads(quote.text)
 
