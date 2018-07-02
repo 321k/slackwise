@@ -79,7 +79,7 @@ def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, transferT
     return json.loads(quote.text)['id']
 
   else:
-    return json.loads(profiles.text)['error']
+    return json.loads(profiles.text)
 
 def createPayment(recipientId, quoteId, reference, access_token):
   transfer = requests.post('https://api.transferwise.com/v1/transfers',

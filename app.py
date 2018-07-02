@@ -270,7 +270,7 @@ def pay():
 		return "Failed to pay"
 
 	else:
-		return 'Click here to pay: https://transferwise.com/transferFlow#/transfer/' + str(requestId)
+		return 'Click here to pay: https://transferwise.com/transferFlow#/transfer/' + str(transferId)
 
 	return 'Successful'
 	
