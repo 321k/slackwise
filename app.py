@@ -260,7 +260,7 @@ def pay():
 	sourceCurrency = accounts['balances'][0]['amount']['currency']
 	print("Source currency: " + str(sourceCurrency))
 
-	quoteId = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, transferType = 'EMAIL', access_token = user.transferwise_token, targetAmount = amount)
+	quoteId = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, transferType = 'email', access_token = user.transferwise_token, targetAmount = amount)
 	print("Quote ID: " + str(quoteId))
 
 	transferId = createPayment(recipientId = recipientId, quoteId = quoteId, reference = 'Slackwise', access_token = user.transferwise_token)
