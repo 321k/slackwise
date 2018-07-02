@@ -37,7 +37,7 @@ def createTransferWiseRecipient(email, currency, name, legalType, profileId, acc
   else:
     return json.loads(profiles.text)
 
-def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, transferType, access_token, sourceAmount=None, targetAmount=None):
+def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, access_token, sourceAmount=None, targetAmount=None):
   if sourceAmount is None and targetAmount is None:
     return "Specify sourceAmount or targetAmount"
   elif sourceAmount is not None and targetAmount is not None:
@@ -45,11 +45,12 @@ def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, transferT
   elif sourceAmount is not None and targetAmount is None:
     quote = requests.post('https://api.transferwise.com/v1/quotes',
       data = json.dumps({
+      'profile': profileId,
       'source': sourceCurrency,
       'target': targetCurrency,
       'rateType': 'FIXED',
       'sourceAmount': sourceAmount,
-      'type': transferType
+      'type': 'REGULAR'
       }),
       headers={
       'Authorization': 'Bearer '+ access_token,
@@ -57,11 +58,12 @@ def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, transferT
   elif sourceAmount is None and targetAmount is not None:
     quote = requests.post('https://api.transferwise.com/v1/quotes',
       data = json.dumps({
+      'profile': profileId,
       'source': sourceCurrency,
       'target': targetCurrency,
       'rateType': 'FIXED',
       'targetAmount': targetAmount,
-      'type': transferType
+      'type': 'REGULAR'
       }),
       headers={
       'Authorization': 'Bearer '+ access_token,
