@@ -13,7 +13,7 @@ def getTransferWiseProfileId(isBusiness, access_token):
     else:
       return json.loads(profiles.text)[0]['id']
   else:
-    return json.loads(profiles.text)['error']
+    return json.loads(profiles.text)
 
 def createTransferWiseRecipient(email, currency, name, legalType, profileId, access_token):
   recipient = requests.post('https://api.transferwise.com/v1/accounts',
@@ -35,7 +35,7 @@ def createTransferWiseRecipient(email, currency, name, legalType, profileId, acc
       return json.loads(recipient.text)['id']
 
   else:
-    return str(json.loads(profiles.text)['error'])
+    return json.loads(profiles.text)
 
 def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, transferType, access_token, sourceAmount=None, targetAmount=None):
   if sourceAmount is None and targetAmount is None:
@@ -99,7 +99,7 @@ def createPayment(recipientId, quoteId, reference, access_token):
     return json.loads(transfer.text)['id']
 
   else:
-    return json.loads(transfer.text)['error']
+    return json.loads(transfer.text)
 
 def redirectToPay(transferId):
   return redirect('https://transferwise.com/transferFlow#/transfer/' + requestId)
