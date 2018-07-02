@@ -58,7 +58,7 @@ def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, transferT
                                 'Authorization': 'Bearer '+ access_token,
                                 'Content-Type': 'application/json'})
 
-  elif targetAmount is None and targetAmount is not None:
+  elif sourceAmount is None and targetAmount is not None:
     quote = requests.post('https://api.transferwise.com/v1/quotes',
                               data = json.dumps({
                               'profile': profileId,
