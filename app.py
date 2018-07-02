@@ -261,14 +261,16 @@ def pay():
 	print("Source currency: " + str(sourceCurrency))
 
 	quoteId = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, transferType = 'EMAIL', access_token = user.transferwise_token, targetAmount = amount)
+	print("Quote ID: " + str(quoteId))
 
 	transferId = createPayment(recipientId = recipientId, quoteId = quoteId, reference = 'Slackwise', access_token = user.transferwise_token)
+	print("Transfer ID: " + str(transferId))
 
 	if transferId == 'Failed to create transfer':
 		return "Failed to pay"
 
 	else:
-		return 'Click here to pay: https://transferwise.com/transferFlow#/transfer/' + requestId
+		return 'Click here to pay: https://transferwise.com/transferFlow#/transfer/' + str(requestId)
 
 	return 'Successful'
 	

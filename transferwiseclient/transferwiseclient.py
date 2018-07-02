@@ -12,10 +12,8 @@ def getTransferWiseProfileId(isBusiness, access_token):
       return json.loads(profiles.text)[1]['id']
     else:
       return json.loads(profiles.text)[0]['id']
-  elif profiles.status_code == 401:
-    return json.loads(profiles.text)['error']
   else:
-    return 'Failed to get profile'
+    return json.loads(profiles.text)['error']
 
 def createTransferWiseRecipient(email, currency, name, legalType, profileId, access_token):
   recipient = requests.post('https://api.transferwise.com/v1/accounts',
@@ -36,11 +34,8 @@ def createTransferWiseRecipient(email, currency, name, legalType, profileId, acc
   if recipient.status_code == 200:
       return json.loads(recipient.text)['id']
 
-  elif recipient.status_code == 401:
-    return json.loads(profiles.text)['error']
-
   else:
-   return 'Failed to create recipient'
+    return str(json.loads(profiles.text)['error'])
 
 def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, transferType, access_token, sourceAmount=None, targetAmount=None):
   if sourceAmount is None and targetAmount is None:
@@ -83,13 +78,8 @@ def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, transferT
   if quote.status_code == 200:
     return json.loads(quote.text)['id']
 
-  elif quote.status_code == 401:
-    return json.loads(profiles.text)['error']
-
   else:
-   return 'Failed to create quote'
-
-
+    return json.loads(profiles.text)['error']
 
 def createPayment(recipientId, quoteId, reference, access_token):
   transfer = requests.post('https://api.transferwise.com/v1/transfers',
@@ -106,10 +96,10 @@ def createPayment(recipientId, quoteId, reference, access_token):
                    'Content-Type': 'application/json'})
 
   if transfer.status_code == 200:
-      return json.loads(transfer.text)['id']
+    return json.loads(transfer.text)['id']
 
   else:
-   return 'Failed to create transfer'
+    return json.loads(transfer.text)['error']
 
 def redirectToPay(transferId):
   return redirect('https://transferwise.com/transferFlow#/transfer/' + requestId)
