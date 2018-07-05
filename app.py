@@ -275,7 +275,6 @@ def pay():
 		message = 'Click here to pay: https://transferwise.com/transferFlow#/transfer/' + str(transferId)
 		post = requests.post(response_url,
                           data = {
-                          	'response_type': 'channel',
                           	'text': message},
                           headers={'Content-type':'application/json'})
 
