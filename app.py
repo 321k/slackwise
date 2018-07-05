@@ -192,6 +192,8 @@ def borderless():
 @app.route('/pay', methods=['POST'])
 def pay():
 	payment  = request.form.get('text')
+	response_url  = request.form.get('response_url')
+	
 	print(str(payment))
 
 	if is_prod == 'True':
@@ -270,7 +272,14 @@ def pay():
 		return "Failed to pay"
 
 	else:
-		return 'Click here to pay: https://transferwise.com/transferFlow#/transfer/' + str(transferId)
+		message = 'Click here to pay: https://transferwise.com/transferFlow#/transfer/' + str(transferId)
+		post = requests.post(response_url,
+                          data = {
+                          	'response_type': 'channel',
+                          	'text': message},
+                          headers={'Content-type':'application/json'})
+
+		return str(json.loads(post.text))
 
 	return 'Successful'
 	
