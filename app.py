@@ -134,7 +134,7 @@ def transferwiseToken():
 
 		elif user.transferwise_token is not None:
 			profileId = getTransferWiseProfileId(isBusiness = False, access_token = user.transferwise_token)
-			print(recipient.status_code)
+			print(profileId.status_code)
 			print('Profile ID: ' + str(profileId))
 			if profileId == 'Failed to get profile':
 				return 'Your token is old, get a new one at http://moneytoemail.herokuapp.com/code and use "/transferwise token" to update'
