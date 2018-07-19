@@ -2,18 +2,13 @@ import uuid
 import requests
 import json
 
-def getTransferWiseProfileId(isBusiness, access_token):
+def getTransferWiseProfiles(access_token):
   profiles = requests.get('https://api.transferwise.com/v1/profiles',
     headers={
     'Authorization': 'Bearer '+ access_token,
     'Content-Type': 'application/json'})
-  if profiles.status_code == 200:
-    if isBusiness == True:
-      return json.loads(profiles.text)[1]['id']
-    else:
-      return json.loads(profiles.text)[0]['id']
-  else:
-    return json.loads(profiles.text)
+  #json.loads(profiles.text)[0]['id']
+  return profiles
 
 def createTransferWiseRecipient(email, currency, name, legalType, profileId, access_token):
   recipient = requests.post('https://api.transferwise.com/v1/accounts',

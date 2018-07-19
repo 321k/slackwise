@@ -4,7 +4,7 @@ import os
 import requests
 import json
 from slackclient import SlackClient
-from transferwiseclient.transferwiseclient import getTransferWiseProfileId, createTransferWiseRecipient, createTransferWiseQuote, createPayment, getBorderlessAccountId, getBorderlessAccounts
+from transferwiseclient.transferwiseclient import getTransferWiseProfiles, createTransferWiseRecipient, createTransferWiseQuote, createPayment, getBorderlessAccountId, getBorderlessAccounts
 from model import db, User
 import time
 
@@ -134,12 +134,12 @@ def transferwiseToken():
 			return 'Connect your account here: http://slackwise.herokuapp.com'
 
 		elif user.transferwise_token is not None:
-			profileId = getTransferWiseProfileId(isBusiness = False, access_token = user.transferwise_token)
-			print(profileId.status_code)
-			print('Profile ID: ' + str(profileId))
-			if profileId == 'Failed to get profile':
+			profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
+			print(profiles.status_code)
+			print('Profiles: ' + str(json.loads(profiles.text)))
+			if profiles.status_code == 401:
 				return 'Your token is old, get a new one at http://moneytoemail.herokuapp.com/code and use "/transferwise token" to update'
-		
+
 		else:
 			return 'Get a token here: http://moneytoemail.herokuapp.com/code'
 
@@ -174,16 +174,28 @@ def borderless():
 	print("TransferWise token: " + str(user.transferwise_token))
 	#sc = SlackClient(user.slack_token)
 
-	profileId = getTransferWiseProfileId(isBusiness=False, access_token = user.transferwise_token)
-	print("Profile ID: " + str(profileId))
+	profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
+	print("Profile ID: " + str(json.loads(profiles.text)))
 
-	if profileId == 'invalid_token':
+	if profiles.status_code == 401:
 		return "Please update your TransferWise token first using /transferwise"
-	
-	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = user.transferwise_token)
-	print("Borderless ID: " + str(borderlessId))
 
+	if profiles.status_code != 200:
+		return str(profiles.error_message)
+	
+	profileId = json.loads(profiles.text)[0]['id']
+	borderless = getBorderlessAccountId(profileId = profileId, access_token = user.transferwise_token)
+	
+	if borderless.status_code != 200:
+		return str(profiles.status_code)
+
+	print("Borderless ID: " + str(json.loads(borderless.text)))
+
+	borderlessId = json.loads(borderless.text)[0]['id']
 	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = user.transferwise_token)
+
+	if accounts.status_code != 200:
+		return str(profiles.status_code)
 
 	text="Your balances are \n"
 	for b in accounts['balances']:
@@ -220,11 +232,20 @@ def pay():
 	print("Slack token: " + str(user.slack_token))
 	print("TransferWise token: " + str(user.transferwise_token))
 	
-	profileId = getTransferWiseProfileId(isBusiness=False, access_token = user.transferwise_token)
-	print("Profile ID: " + str(profileId))
+	profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
 
-	if profileId == 'invalid_token':
+	if profiles.status_code == 401:
 		return "Please update your TransferWise token first using /transferwise"
+
+	if profiles.status_code == 401:
+		return str(profiles.error_message)
+
+	profileId = json.loads(profiles.text)[0]['id']
+	print("Profile ID: " + str(json.loads(profiles.text)))
+
+	end_time = time.time()
+	print("Profile Time: " + str(end_time - start_time))
+
 
 	payment = payment.split(' ')
 
@@ -290,6 +311,7 @@ def pay():
 	if transfer.status_code == 401:
 		return str(transfer.error_message)
 
+	end_time = time.time()
 	print("Transfer Time: " + str(end_time - start_time))
 
 	transferId = json.loads(transfer.text)['id']
