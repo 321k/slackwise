@@ -125,7 +125,7 @@ def transferwiseToken():
 	if is_prod == 'True':	
 		slack_id = request.form.get('user_id')
 	else:
-		slack_id = 'UBCUSHSNP'
+		slack_id = 'UBH7TETRB'
 	
 	user = User.query.filter_by(slack_id=slack_id).first()
 	
@@ -146,7 +146,19 @@ def transferwiseToken():
 	if user is None:
 		return "Please connect your account first"
 	else:	
+		profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
+
+		if profiles.status_code == 401:
+			return "Please update your TransferWise token first using /transferwise"
+
+		if profiles.status_code == 401:
+			return str(profiles.error_message)
+
+		profileId = json.loads(profiles.text)[0]['id']
+		print("Profile ID: " + str(json.loads(profiles.text)))
+
 		user.transferwise_token = token
+		user.transferwise_profile_id = profileId
 		db.session.commit()
 
 	return 'Thank you, you can now interact with the slackwise bot'

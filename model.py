@@ -21,11 +21,13 @@ class User(BaseModel):
 	slack_id = db.Column(db.String(120))
 	slack_token = db.Column(db.String(120))
 	transferwise_token = db.Column(db.String(120))
+	transerwise_profile_id = db.Column(db.Integer)
 	email = db.Column(db.String(120))
 	date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-	def __init__(self, slack_token = None, transferwise_token = None, slack_id = None, email = None):
+	def __init__(self, slack_token = None, transferwise_token = None, slack_id = None, email = None, transferwise_profile_id = None):
 		self.slack_id = slack_id
 		self.slack_token = slack_token
 		self.transferwise_token = transferwise_token
 		self.email = email
+		self.transferwise_profile_id = transferwise_profile_id
