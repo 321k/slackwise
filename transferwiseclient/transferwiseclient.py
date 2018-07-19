@@ -30,12 +30,8 @@ def createTransferWiseRecipient(email, currency, name, legalType, profileId, acc
                 headers={
                    'Authorization': 'Bearer '+ access_token,
                    'Content-Type': 'application/json'})
-
-  if recipient.status_code == 200:
-      return json.loads(recipient.text)['id']
-
-  else:
-    return json.loads(profiles.text)
+  #recipient.text['id']
+  return recipient
 
 def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, access_token, sourceAmount=None, targetAmount=None):
   if sourceAmount is None and targetAmount is None:
@@ -76,7 +72,7 @@ def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, access_to
     return json.loads(quote.text)
 
 def createPayment(recipientId, quoteId, reference, access_token):
-  transfer = requests.post('https://api.transferwise.com/v1/transfers',
+  response = requests.post('https://api.transferwise.com/v1/transfers',
                 data = json.dumps({
                   "targetAccount": recipientId,
                   "quote": quoteId,
@@ -88,12 +84,8 @@ def createPayment(recipientId, quoteId, reference, access_token):
                 headers={
                    'Authorization': 'Bearer '+ access_token,
                    'Content-Type': 'application/json'})
-
-  if transfer.status_code == 200:
-    return json.loads(transfer.text)['id']
-
-  else:
-    return json.loads(transfer.text)
+  #json.loads(transfer.text)['id']
+  return response
 
 def redirectToPay(transferId):
   return redirect('https://transferwise.com/transferFlow#/transfer/' + requestId)
@@ -104,11 +96,12 @@ def getBorderlessAccountId(profileId, access_token):
                 headers={
                    'Authorization': 'Bearer '+ access_token,
                    'Content-Type': 'application/json'})
-  return json.loads(response.text)[0]['id']
+  #json.loads(response.text)[0]['id']
+  return response
 
 def getBorderlessAccounts(borderlessId, access_token):
   response = requests.get('https://api.transferwise.com/v1/borderless-accounts/' + str(borderlessId),
                 headers={
                    'Authorization': 'Bearer '+ access_token,
                    'Content-Type': 'application/json'})
-  return json.loads(response.text)
+  return response

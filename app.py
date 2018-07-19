@@ -6,6 +6,7 @@ import json
 from slackclient import SlackClient
 from transferwiseclient.transferwiseclient import getTransferWiseProfileId, createTransferWiseRecipient, createTransferWiseQuote, createPayment, getBorderlessAccountId, getBorderlessAccounts
 from model import db, User
+import time
 
 #Declare global variables
 global slack_token
@@ -192,10 +193,13 @@ def borderless():
 
 @app.route('/pay', methods=['POST'])
 def pay():
+	start_time = time.time()
+
 	payment  = request.form.get('text')
 	response_url  = request.form.get('response_url')
 	
 	print(str(payment))
+	print(str(response_url))
 
 	if is_prod == 'True':
 		slack_id = request.form.get('user_id')
@@ -249,39 +253,56 @@ def pay():
 	name = first_name + ' ' + last_name
 	print('Name: ' + name)
 
-	recipientId = createTransferWiseRecipient(email = recipient.email, currency = currency, name = name, legalType='PRIVATE', profileId = profileId, access_token = user.transferwise_token)
-
-	if recipientId == 'Failed to create recipient':
+	recipient = createTransferWiseRecipient(email = recipient.email, currency = currency, name = name, legalType='PRIVATE', profileId = profileId, access_token = user.transferwise_token)
+	print(recipient)
+	if recipient.status_code == 401:
 		return 'Your token is old, get a new one at http://moneytoemail.herokuapp.com/code and use "/transferwise token" to update'
 
-	print("Recipient ID: " + str(recipientId))
+	end_time = time.time()
+	print("Recipient Time: " + str(end_time - start_time))
+
 
 	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = user.transferwise_token)
-	print("Borderless ID: " + str(borderlessId))
+
+	if borderlessId.status_code == 401:
+		return str(borderlessId.error_message)
+
+	print("Borderless ID: " + str(json.loads(borderlessId.text)[0]['id']))
+	end_time = time.time()
+	print("Borderless Time: " + str(end_time - start_time))
+
 
 	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = user.transferwise_token)
-	sourceCurrency = accounts['balances'][0]['amount']['currency']
+	
+	if accounts.status_code == 200:
+		sourceCurrency = accounts['balances'][0]['amount']['currency']
+	elif is_prod is None:
+		sourceCurrency = 'GBP'
+	else:
+		return str(response.error_message)
 	print("Source currency: " + str(sourceCurrency))
 
 	quoteId = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, access_token = user.transferwise_token, targetAmount = amount)
 	print("Quote ID: " + str(quoteId))
 
-	transferId = createPayment(recipientId = recipientId, quoteId = quoteId, reference = 'Slackwise', access_token = user.transferwise_token)
+	recipientId = json.loads(recipient.text)['id']
+	transfer = createPayment(recipientId = recipientId, quoteId = quoteId, reference = 'Slackwise', access_token = user.transferwise_token)
+	if transfer.status_code == 401:
+		return str(transfer.error_message)
+
+	print("Transfer Time: " + str(end_time - start_time))
+
+	transferId = json.loads(transfer.text)['id']
 	print("Transfer ID: " + str(transferId))
+
+	end_time = time.time()
+	print("Total Time: " + str(end_time - start_time))
 
 	if transferId == 'Failed to create transfer':
 		return "Failed to pay"
 
 	else:
-		message = 'Click here to pay: https://transferwise.com/transferFlow#/transfer/' + str(transferId)
-		post = requests.post(response_url,
-                          data = {
-                          	'text': message},
-                          headers={'Content-type':'application/json'})
-
-		return str(json.loads(post.text))
-
-	return 'Successful'
+		return 'Click here to pay: https://transferwise.com/transferFlow#/transfer/' + str(transferId)
 	
 
 if __name__ == '__main__':
