@@ -289,7 +289,8 @@ def pay():
 	if borderlessId.status_code == 401:
 		return str(borderlessId.error_message)
 
-	print("Borderless ID: " + str(json.loads(borderlessId.text)[0]['id']))
+	borderlessId = json.loads(borderlessId.text)[0]['id']
+	print("Borderless ID: " + str(borderlessId))
 	end_time = time.time()
 	print("Borderless Time: " + str(end_time - start_time))
 
@@ -302,7 +303,7 @@ def pay():
 	elif is_prod is None:
 		sourceCurrency = 'GBP'
 	else:
-		return str(response.error_message)
+		return str(accounts.error_message)
 	print("Source currency: " + str(sourceCurrency))
 
 	quoteId = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, access_token = user.transferwise_token, targetAmount = amount)
