@@ -197,6 +197,7 @@ def borderless():
 	if accounts.status_code != 200:
 		return str(profiles.status_code)
 
+	accounts = json.loads(accounts.text)
 	text="Your balances are \n"
 	for b in accounts['balances']:
 		text+=str(b['amount']['value']) + " " + str(b['amount']['currency']) + "\n"
@@ -296,6 +297,7 @@ def pay():
 	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = user.transferwise_token)
 	
 	if accounts.status_code == 200:
+		accounts = json.loads(accounts.text)
 		sourceCurrency = accounts['balances'][0]['amount']['currency']
 	elif is_prod is None:
 		sourceCurrency = 'GBP'
