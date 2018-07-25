@@ -21,7 +21,7 @@ class User(BaseModel):
 	slack_id = db.Column(db.String(120))
 	slack_token = db.Column(db.String(120))
 	transferwise_token = db.Column(db.String(120))
-	transerwise_profile_id = db.Column(db.Integer)
+	transferwise_profile_id = db.Column(db.Integer)
 	email = db.Column(db.String(120))
 	date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
