@@ -146,10 +146,8 @@ def transferwiseToken():
 	if user is None:
 		return "Please connect your account first"
 	else:	
+		print("Token: " + str(token))
 		profiles = getTransferWiseProfiles(access_token = token)
-
-		if profiles.status_code == 401:
-			return "Please update your TransferWise token first using /transferwise"
 
 		if profiles.status_code == 401:
 			return str(profiles.error_message)
@@ -230,7 +228,7 @@ def pay():
 		slack_id = request.form.get('user_id')
 		print("Live slack ID: " + str(slack_id))
 	else:
-		slack_id = 'UBCUSHSNP'
+		slack_id = 'UBH7TETRB'
 		print("Test slack ID: " + str(slack_id))
 
 	user = User.query.filter_by(slack_id=slack_id).first()
@@ -262,10 +260,10 @@ def pay():
 		db.session.commit()
 
 
-	print("Profile ID: " + str(json.loads(profileId)))
+	print("Profile ID: " + str(profileId))
 
 	end_time = time.time()
-	print("Profile Time: " + str(end_timprofile_ide - start_time))
+	print("Profile Time: " + str(end_time - start_time))
 
 
 	payment = payment.split(' ')
@@ -303,31 +301,50 @@ def pay():
 	end_time = time.time()
 	print("Recipient Time: " + str(end_time - start_time))
 
+	# Defaulting to GBP in order not to breake 3 second budget from Slack
+	sourceCurrency = 'GBP'
 
-	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = user.transferwise_token)
+	if sourceCurrency is None:
+		borderlessId = getBorderlessAccountId(profileId = profileId, access_token = user.transferwise_token)
 
-	if borderlessId.status_code == 401:
-		return str(borderlessId.error_message)
+		if borderlessId.status_code == 401:
+			return str(borderlessId.error_message)
 
-	borderlessId = json.loads(borderlessId.text)[0]['id']
-	print("Borderless ID: " + str(borderlessId))
-	end_time = time.time()
-	print("Borderless Time: " + str(end_time - start_time))
+		borderlessId = json.loads(borderlessId.text)[0]['id']
+		print("Borderless ID: " + str(borderlessId))
+		end_time = time.time()
+		print("Borderless Time: " + str(end_time - start_time))
 
 
-	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = user.transferwise_token)
+		accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = user.transferwise_token)
+		
+		if accounts.status_code == 200:
+			accounts = json.loads(accounts.text)
+			sourceCurrency = accounts['balances'][0]['amount']['currency']
+
+		elif is_prod is None:
+			sourceCurrency = 'GBP'
+		else:
+			return str(accounts.error_message)
+		print("Source currency: " + str(sourceCurrency))
 	
-	if accounts.status_code == 200:
-		accounts = json.loads(accounts.text)
-		sourceCurrency = accounts['balances'][0]['amount']['currency']
-	elif is_prod is None:
-		sourceCurrency = 'GBP'
-	else:
-		return str(accounts.error_message)
-	print("Source currency: " + str(sourceCurrency))
 
-	quoteId = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, access_token = user.transferwise_token, targetAmount = amount)
+	quote = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, access_token = user.transferwise_token, targetAmount = amount)
+	print(quote.status_code)
+
+	if quote.status_code == 422:
+		print("Unsupported currency, defaulting to GBP")
+		sourceCurrency = 'GBP'
+		quote = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, access_token = user.transferwise_token, targetAmount = amount)
+
+	if quote.status_code == 401:
+		return str(quote.error_message)
+
+	quoteId = json.loads(quote.text)['id']
 	print("Quote ID: " + str(quoteId))
+	end_time = time.time()
+	print("Quote Time: " + str(end_time - start_time))
+
 
 	recipientId = json.loads(recipient.text)['id']
 	transfer = createPayment(recipientId = recipientId, quoteId = quoteId, reference = 'Slackwise', access_token = user.transferwise_token)

@@ -61,10 +61,8 @@ def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, access_to
       'Content-Type': 'application/json'})
   else:
    return "Something went wrong"
-  if quote.status_code == 200:
-    return json.loads(quote.text)['id']
-  else:
-    return json.loads(quote.text)
+  #json.loads(quote.text)['id']
+  return quote
 
 def createPayment(recipientId, quoteId, reference, access_token):
   response = requests.post('https://api.transferwise.com/v1/transfers',
