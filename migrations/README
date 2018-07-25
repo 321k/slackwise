@@ -1,1 +1,6 @@
-Generic single-database configuration.
+Slack bot for TransferWise
+- Check your balance
+- Pay other Slack users
+
+DB migration instructions:
+https://realpython.com/flask-by-example-part-2-postgres-sqlalchemy-and-alembic/#remote-migration
