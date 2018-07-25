@@ -146,7 +146,7 @@ def transferwiseToken():
 	if user is None:
 		return "Please connect your account first"
 	else:	
-		profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
+		profiles = getTransferWiseProfiles(access_token = token)
 
 		if profiles.status_code == 401:
 			return "Please update your TransferWise token first using /transferwise"
