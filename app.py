@@ -245,19 +245,27 @@ def pay():
 	print("Slack token: " + str(user.slack_token))
 	print("TransferWise token: " + str(user.transferwise_token))
 	
-	profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
+	profileId = user.transferwise_profile_id
 
-	if profiles.status_code == 401:
-		return "Please update your TransferWise token first using /transferwise"
+	if profileId is None:
+		profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
 
-	if profiles.status_code == 401:
-		return str(profiles.error_message)
+		if profiles.status_code == 401:
+			return "Please update your TransferWise token first using /transferwise"
 
-	profileId = json.loads(profiles.text)[0]['id']
-	print("Profile ID: " + str(json.loads(profiles.text)))
+		if profiles.status_code == 401:
+			return str(profiles.error_message)
+
+		profileId = json.loads(profiles.text)[0]['id']
+
+		user.tansferwise_profile_id = profileId
+		db.session.commit()
+
+
+	print("Profile ID: " + str(json.loads(profileId)))
 
 	end_time = time.time()
-	print("Profile Time: " + str(end_time - start_time))
+	print("Profile Time: " + str(end_timprofile_ide - start_time))
 
 
 	payment = payment.split(' ')
