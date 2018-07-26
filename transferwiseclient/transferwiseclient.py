@@ -3,11 +3,13 @@ import requests
 import json
 
 def getTransferWiseProfiles(access_token):
+  # To get the personal profile ID, use json.loads(profiles.text)[0]['id']
+
   profiles = requests.get('https://api.transferwise.com/v1/profiles',
     headers={
     'Authorization': 'Bearer '+ access_token,
     'Content-Type': 'application/json'})
-  #json.loads(profiles.text)[0]['id']
+  
   return profiles
 
 def createTransferWiseRecipient(email, currency, name, legalType, profileId, access_token):
@@ -25,7 +27,7 @@ def createTransferWiseRecipient(email, currency, name, legalType, profileId, acc
                 headers={
                    'Authorization': 'Bearer '+ access_token,
                    'Content-Type': 'application/json'})
-  #recipient.text['id']
+  #json.loads(recipient.text)['id']
   return recipient
 
 def createTransferWiseQuote(profileId, sourceCurrency, targetCurrency, access_token, sourceAmount=None, targetAmount=None):

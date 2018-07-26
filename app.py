@@ -167,7 +167,7 @@ def transferwiseToken():
 		borderlessId = json.loads(borderlessId.text)[0]['id']
 		print("Borderless ID: " + str(borderlessId))
 
-		accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = user.transferwise_token)
+		accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = token)
 		
 		if accounts.status_code == 200:
 			accounts = json.loads(accounts.text)
