@@ -132,7 +132,9 @@ def transferwiseToken():
 	# Check that the user has a valid token
 	if token is None or len(token)<5:	
 		if user is None:
-			return 'Connect your Slack account here: http://slackwise.herokuapp.com'
+			user = User(slack_id = slack_id)
+			db.session.add(user)
+			return 'Please provide a TransferWise API key'
 
 		if user.transferwise_token is not None:
 			token = user.transferwise_token
@@ -141,51 +143,50 @@ def transferwiseToken():
 			print('Profiles: ' + str(json.loads(profiles.text)))
 
 			if profiles.status_code == 401:
-				return 'Your token is old, get a new one at http://moneytoemail.herokuapp.com/code and use "/transferwise token" to update'
+				return 'Your token is old, please provide a new one.'
 
 	# Check that the user has connected their Slack account
 	if user is None:
-		return 'Connect your Slack account here: http://slackwise.herokuapp.com'
+		user = User(slack_id = slack_id)
+		db.session.add(user)
 
-	# If the have a valid token and a connected account, proceed
-	else:	
-		print("Token: " + str(token))
-		profiles = getTransferWiseProfiles(access_token = token)
-		print(profiles.status_code)
+	print("Token: " + str(token))
+	profiles = getTransferWiseProfiles(access_token = token)
+	print(profiles.status_code)
 
-		if profiles.status_code == 401:
-			return str(json.loads(profiles.text))
+	if profiles.status_code == 401:
+		return str(json.loads(profiles.text))
 
-		profileId = json.loads(profiles.text)[0]['id']
-		print("Profile ID: " + str(json.loads(profiles.text)))
+	profileId = json.loads(profiles.text)[0]['id']
+	print("Profile ID: " + str(json.loads(profiles.text)))
 
-		borderlessId = getBorderlessAccountId(profileId = profileId, access_token = token)
+	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = token)
 
-		if borderlessId.status_code == 401:
-			return str(borderlessId.error_message)
+	if borderlessId.status_code == 401:
+		return str(borderlessId.error_message)
 
-		borderlessId = json.loads(borderlessId.text)[0]['id']
-		print("Borderless ID: " + str(borderlessId))
+	borderlessId = json.loads(borderlessId.text)[0]['id']
+	print("Borderless ID: " + str(borderlessId))
 
-		accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = token)
-		
-		if accounts.status_code == 200:
-			accounts = json.loads(accounts.text)
-
-			# The first record has the highest balance, so we'll default to that
-			sourceCurrency = accounts['balances'][0]['amount']['currency']
-
-		if sourceCurrency not in ['USD','AUD','BGN','BRL','CAD','CHF','CZK','DKK','EUR','GBP','HKD','HRK','HUF','JPY','NOK','NZD','PLN','RON','SEK','SGD','TRY']:
-			print("Source currency not valid, assuming GBP")
-			sourceCurrency = 'GBP'
-
-		print("Source currency: " + str(sourceCurrency))
+	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = token)
 	
+	if accounts.status_code == 200:
+		accounts = json.loads(accounts.text)
 
-		user.transferwise_token = token
-		user.transferwise_profile_id = profileId
-		user.home_currency = sourceCurrency
-		db.session.commit()
+		# The first record has the highest balance, so we'll default to that
+		sourceCurrency = accounts['balances'][0]['amount']['currency']
+
+	if sourceCurrency not in ['USD','AUD','BGN','BRL','CAD','CHF','CZK','DKK','EUR','GBP','HKD','HRK','HUF','JPY','NOK','NZD','PLN','RON','SEK','SGD','TRY']:
+		print("Source currency not valid, assuming GBP")
+		sourceCurrency = 'GBP'
+
+	print("Source currency: " + str(sourceCurrency))
+
+
+	user.transferwise_token = token
+	user.transferwise_profile_id = profileId
+	user.home_currency = sourceCurrency
+	db.session.commit()
 
 	return 'You can now use the TransfeWise bot.'
 
