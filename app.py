@@ -125,7 +125,7 @@ def transferwiseToken():
 
 	if token == 'delete':
 		print('Deleting user ' + slack_id)
-		user = User.query.filter(slack_id == slack_id).first()
+		user = User.query.filter(slack_id = slack_id).first()
 		db.session.delete(user)
 		db.session.commit()
 		return 'Token deleted'
