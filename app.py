@@ -124,6 +124,7 @@ def transferwiseToken():
 	slack_id = request.form.get('user_id')
 
 	if token == 'delete':
+		print('Deleting user ' + slack_id)
 		user = User.query.filter(slack_id == slack_id).first()
 		db.session.delete(user)
 		db.session.commit()
