@@ -127,10 +127,11 @@ def transferwiseToken():
 	else:
 		slack_id = 'UBH7TETRB'
 	
-	user = User.query.filter_by(slack_id=slack_id).first()
-	
 	if token == 'delete':
 		User.query.filter(slack_id == slack_id).delete()
+		return 'Token deleted'
+
+	user = User.query.filter_by(slack_id=slack_id).first()
 
 	# Check that the user has a valid token
 	if token is None or len(token)<5:	
