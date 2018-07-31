@@ -121,14 +121,12 @@ def slack():
 @app.route('/transferwise', methods=['POST'])
 def transferwiseToken():
 	token  = request.form.get('text')
+	slack_id = request.form.get('user_id')
 
-	if is_prod == 'True':	
-		slack_id = request.form.get('user_id')
-	else:
-		slack_id = 'UBH7TETRB'
-	
 	if token == 'delete':
-		User.query.filter(slack_id == slack_id).delete()
+		user = User.query.filter(slack_id == slack_id).first()
+		db.session.delete(user)
+		db.session.commit()
 		return 'Token deleted'
 
 	user = User.query.filter_by(slack_id=slack_id).first()
