@@ -140,7 +140,7 @@ def transferwiseToken():
 		if user is None:
 			user = User(slack_id = slack_id)
 			db.session.add(user)
-			return 'Please provide a TransferWise API key'
+			return 'Please provide a TransferWise API key /transferwise api_key'
 
 		if user.transferwise_token is not None:
 			token = user.transferwise_token
@@ -198,24 +198,17 @@ def transferwiseToken():
 
 @app.route('/balances', methods=['POST'])
 def borderless():
-
-	if is_prod == 'True':
-		slack_id = request.form.get('user_id')
-		print("Live slack ID: " + str (slack_id))
-	else:
-		slack_id = 'UBCUSHSNP'
-		print("Test slack ID: " + str(slack_id))
-
+	slack_id = request.form.get('user_id')
+	
 	user = User.query.filter_by(slack_id=slack_id).first()
 
 	if user is None:
-		return 'Please connect your Slack account first at slackwise.herokuapp.com'
-	elif user.slack_token is None:
-		return 'Please connect your Slack account first at slackwise.herokuapp.com'
-	elif user.transferwise_token is None:
-		return 'Please connect your TransferWise account first using /transferwise'
+		user = User(slack_id = slack_id)
+		db.session.add(user)
 
-	print("Slack token: " + str(user.slack_token))
+	if user.transferwise_token is None:
+		return 'Please add your TransferWise token first using /transferwise token'
+
 	print("TransferWise token: " + str(user.transferwise_token))
 	#sc = SlackClient(user.slack_token)
 
