@@ -101,6 +101,14 @@ def getBorderlessAccounts(borderlessId, access_token):
                    'Content-Type': 'application/json'})
   return response
 
+def getBorderlessActivity(borderlessAccountId, access_token):
+  response = requests.get('https://api.transferwise.com/v1/borderless-accounts/' + str(borderlessAccountId) + '/transactions',
+                headers={
+                   'Authorization': 'Bearer '+ access_token,
+                   'Content-Type': 'application/json'})
+  return response
+
+
 def getTransfers(limit, offset, accessToken, createdDateStart = None, createdDateEnd = None):
   
   if createdDateStart is None and createdDateEnd is None:

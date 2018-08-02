@@ -4,9 +4,11 @@ import os
 import requests
 import json
 from slackclient import SlackClient
-from transferwiseclient.transferwiseclient import getTransferWiseProfiles, createTransferWiseRecipient, createTransferWiseQuote, createPayment, getBorderlessAccountId, getBorderlessAccounts, getTransfers
+from transferwiseclient.transferwiseclient import getTransferWiseProfiles, createTransferWiseRecipient, createTransferWiseQuote, createPayment, getBorderlessAccountId, getBorderlessAccounts, getTransfers, getBorderlessActivity
 from model import db, User
 import time
+from datetime import datetime, timedelta
+
 
 #Declare global variables
 global slack_token
@@ -392,18 +394,25 @@ def lastest():
 
 	slack_id = request.form.get('user_id')
 	user = User.query.filter_by(slack_id=slack_id).first()
-	#endDate = time.gmtime()
-	#startDate = time.gmtime()
-	transfers = getTransfers(limit = limit, offset = 0, accessToken = user.transferwise_token)
-	transfers = json.loads(transfers.text)
-	text="Your latest transfers: \n"
-	for b in transfers:
-		if b['reference'] == "":
-			reference = '(No reference)'
-		else:
-			reference = b['reference']
-		text+=str(reference) + " " + str(b['targetValue']) + " " + str(b['targetCurrency']) + ", " + str(b['status']) + "\n"
 
+	startDate = datetime.today() - timedelta(days=1)
+	endDate = datetime.today()
+
+	borderlessAccountId = getBorderlessAccountId(user.transferwise_profile_id, user.transferwise_token)
+	borderlessAccountId = json.loads(borderlessAccountId.text)[0]['id']
+
+	activity = getBorderlessActivity(borderlessAccountId, user.transferwise_token)
+	activity = json.loads(activity.text)
+
+	print(activity[0])
+
+	#transfers = getTransfers(limit = limit, offset = 0, accessToken = user.transferwise_token, createdDateStart = str(endDate.date()), createdDateEnd = str(endDate.date()))
+	#transfers = json.loads(transfers.text)
+	#print(str(transfers))
+
+	text="Your latest borderless activity: \n"
+	for b in activity:
+		text+= str(b['amount']['value']) + " " + str(b['amount']['currency']) +  " " + str(b['type']) + " " + str(b['creationTime']) + " " + "\n"
 
 	return str(text)
 
