@@ -259,18 +259,18 @@ def pay():
 
 	if profileId is None:
 		return 'Please connect your TransferWise account using /transerwise token'
-
-	text = text.replace("<mailto:", "")
-	text = text.replace(">", "")
-	text = text.split(' ')
-
+	
 	if len(text) < 3:
 		return 'Please use the format /pay email amount currency'
 
 	if len(text[0].split('@')) < 2:
 		return 'Please include a valid email'
 	
+	text = text.split(' ')
 	recipient_email = text[0]
+	recipient_email.split('|')[1].replace(">", "")
+	
+	print('Recipient email: ' + str(recipient_email))
 
 	amount = text[1]
 	print('Amount: ' + str(amount))
