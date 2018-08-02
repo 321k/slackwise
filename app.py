@@ -248,6 +248,8 @@ def pay():
 
 	text  = request.form.get('text')
 	print(text)
+	text = text.split(' ')
+
 	slack_id = request.form.get('user_id')
 
 	user = User.query.filter_by(slack_id=slack_id).first()
@@ -266,9 +268,9 @@ def pay():
 	if len(text[0].split('@')) < 2:
 		return 'Please include a valid email'
 	
-	text = text.split(' ')
+	
 	recipient_email = text[0]
-	recipient_email.split('|')[1].replace(">", "")
+	recipient_email = recipient_email.split('|')[1].replace(">", "")
 	
 	print('Recipient email: ' + str(recipient_email))
 
