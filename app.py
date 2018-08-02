@@ -279,14 +279,16 @@ def pay():
 
 	name = recipient_email.split('@')[0].split('.')
 
-
+	first_name = name[0]
+	first_name = ''.join([i for i in first_name if not i.isdigit()])
+	
 	if len(name) < 2:
-		first_name = name[0]
 		last_name = 'Unknown'
 
 	else:
-		first_name = name[0]
 		last_name = name[len(name)-1]
+		last_name = ''.join([i for i in last_name if not i.isdigit()])
+
 
 	if len(last_name)<3:
 		last_name = 'Unknown'
@@ -298,10 +300,10 @@ def pay():
 	print(recipient)
 
 	if recipient.status_code == 401:
-		return 'Your token is old, get a new one at http://moneytoemail.herokuapp.com/code and use "/transferwise token" to update'
+		return 'Connect your TransferWise account using /transferwise token'
 
 	if recipient.status_code != 200:
-		return recipient.status_code
+		return str(recipient.text)
 
 	end_time = time.time()
 	print("Recipient Time: " + str(end_time - start_time))
@@ -331,7 +333,7 @@ def pay():
 	recipientId = json.loads(recipient.text)['id']
 	transfer = createPayment(recipientId = recipientId, quoteId = quoteId, reference = 'Slackwise', access_token = user.transferwise_token)
 	if transfer.status_code == 401:
-		return str(transfer.error_message)
+		return str(json.loads(transfer.text))
 
 	end_time = time.time()
 	print("Transfer Time: " + str(end_time - start_time))
