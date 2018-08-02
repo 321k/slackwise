@@ -412,7 +412,24 @@ def lastest():
 
 	text="Your latest borderless activity: \n"
 	for b in activity:
-		text+= str(b['amount']['value']) + " " + str(b['amount']['currency']) +  " " + str(b['type']) + " " + str(b['creationTime']) + " " + "\n"
+		currency = str(b['amount']['currency'])
+
+		if currency == 'USD':
+			currency = ':us:'
+		elif currency == 'GBP':
+			currency = ':uk:'
+
+		activityType = str(b['type'])
+
+		if activityType == 'DEPOSIT':
+			activityType = ':moneybag:'
+		elif activityType == 'WITHDRAWAL':
+			activityType = ':byebyemoney:'
+
+
+
+
+		text+= str(b['amount']['value']) + " " + currency +  " " + activityType + " " + str(b['creationTime']) + " " + "\n"
 
 	return str(text)
 
