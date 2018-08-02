@@ -259,6 +259,8 @@ def pay():
 	if profileId is None:
 		return "Please update your TransferWise token first using /transferwise token"
 
+	text = text.replace("<mailto:", "")
+	text = text.replace(">", "")
 	text = text.split(' ')
 
 	if len(text) < 3:
@@ -276,6 +278,7 @@ def pay():
 	print('Currency: ' + str(currency))
 
 	name = recipient_email.split('@')[0].split('.')
+
 
 	if len(name) < 2:
 		first_name = name[0]
@@ -296,6 +299,9 @@ def pay():
 
 	if recipient.status_code == 401:
 		return 'Your token is old, get a new one at http://moneytoemail.herokuapp.com/code and use "/transferwise token" to update'
+
+	if recipient.status_code != 200:
+		return recipient.status_code
 
 	end_time = time.time()
 	print("Recipient Time: " + str(end_time - start_time))
