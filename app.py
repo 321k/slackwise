@@ -428,7 +428,7 @@ def lastest():
 		if activityType == 'DEPOSIT':
 			activityType = ':moneybag:'
 		elif activityType == 'WITHDRAWAL':
-			activityType = ':byebyemoney:'
+			activityType = ':wave:'
 
 		text+= str(currency) + str(b['amount']['value']) + " " + str(b['amount']['currency']) +  " " + activityType + " " + str(b['creationTime']) + " " + "\n"
 
