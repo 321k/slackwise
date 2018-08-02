@@ -414,7 +414,7 @@ def lastest():
 	#startDate = time.gmtime()
 	transfers = getTransfers(limit = limit, offset = 0, accessToken = user.transferwise_token)
 	transfers = json.loads(transfers.text)
-	text="Your five latest transfers: \n"
+	text="Your latest transfers: \n"
 	for b in transfers:
 		if b['reference'] == "":
 			reference = '(No reference)'
