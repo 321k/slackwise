@@ -4,7 +4,7 @@ import os
 import requests
 import json
 from slackclient import SlackClient
-from transferwiseclient.transferwiseclient import getTransferWiseProfiles, createTransferWiseRecipient, createTransferWiseQuote, createPayment, getBorderlessAccountId, getBorderlessAccounts
+from transferwiseclient.transferwiseclient import getTransferWiseProfiles, createTransferWiseRecipient, createTransferWiseQuote, createPayment, getBorderlessAccountId, getBorderlessAccounts, getTransfers
 from model import db, User
 import time
 
@@ -397,6 +397,26 @@ def home_currency():
 
 	return "Home currency updated"
 	
+
+@app.route('/latest', methods=['POST'])
+def lastest():
+	slack_id = request.form.get('user_id')
+	user = User.query.filter_by(slack_id=slack_id).first()
+	#endDate = time.gmtime()
+	#startDate = time.gmtime()
+	transfers = getTransfers(limit = 5, offset = 0, accessToken = user.transferwise_token)
+	transfers = json.loads(transfers.text)
+	text="Your five latest transfers: \n"
+	for b in transfers:
+		if b['reference'] == "":
+			reference = '(No reference)'
+		else:
+			reference = b['reference']
+		text+=str(reference) + " " + str(b['targetValue']) + " " + str(b['targetCurrency']) + ", " + str(b['status']) + "\n"
+
+
+	return str(text)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=port)

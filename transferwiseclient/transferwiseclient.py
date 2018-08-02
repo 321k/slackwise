@@ -100,3 +100,30 @@ def getBorderlessAccounts(borderlessId, access_token):
                    'Authorization': 'Bearer '+ access_token,
                    'Content-Type': 'application/json'})
   return response
+
+def getTransfers(limit, offset, accessToken, createdDateStart = None, createdDateEnd = None):
+  
+  if createdDateStart is None and createdDateEnd is None:
+    response = requests.get('https://api.transferwise.com/v1/transfers?limit=' + str(limit) + '&offest=' + str(offset),
+               headers={
+                   'Authorization': 'Bearer '+ accessToken,
+                   'Content-Type': 'application/json'})
+
+  elif createdDateStart is None and createdDateEnd is not None:
+    response = requests.get('https://api.transferwise.com/v1/transfers?limit=' + str(limit) + '&offest=' + str(offset) + '&createdDateEnd=' + str(createdDateEnd),
+               headers={
+                   'Authorization': 'Bearer '+ accessToken,
+                   'Content-Type': 'application/json'})
+
+  elif createdDateStart is not None and createdDateEnd is None:
+    response = requests.get('https://api.transferwise.com/v1/transfers?limit=' + str(limit) + '&offest=' + str(offset) + '&createdDateStart=' + str(createdDateStart),
+               headers={
+                   'Authorization': 'Bearer '+ accessToken,
+                   'Content-Type': 'application/json'})
+
+  else:
+    response = requests.get('https://api.transferwise.com/v1/transfers?limit=' + str(limit) + '&offest=' + str(offset) + '&createdDateStart=' + str(createdDateStart) + '&createdDateEnd=' + str(createdDateEnd),
+                 headers={
+                     'Authorization': 'Bearer '+ accessToken,
+                     'Content-Type': 'application/json'})
+  return response
