@@ -447,7 +447,7 @@ def lastest():
 		elif activityType == 'WITHDRAWAL':
 			activityType = ':wave:'
 
-		text+= str(currency) + str(b['amount']['value']) + " " + str(b['amount']['currency']) +  " " + activityType + " " + str(b['type']) + " " + str(b['creationTime'])[0:10] + " " + str(b['creationTime'])[12:16] + "\n"
+		text+= str(currency) + str(b['amount']['value']) + " " + str(b['amount']['currency']) +  " " + activityType + " " + str(b['type']) + " " + str(b['creationTime'])[0:10] + " " + str(b['creationTime'])[11:16] + "\n"
 
 	return str(text)
 
