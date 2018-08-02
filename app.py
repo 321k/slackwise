@@ -247,6 +247,7 @@ def pay():
 	start_time = time.time()
 
 	text  = request.form.get('text')
+	print(text)
 	slack_id = request.form.get('user_id')
 
 	user = User.query.filter_by(slack_id=slack_id).first()
@@ -257,7 +258,7 @@ def pay():
 	profileId = user.transferwise_profile_id
 
 	if profileId is None:
-		return "Please update your TransferWise token first using /transferwise token"
+		return 'Please connect your TransferWise account using /transerwise token'
 
 	text = text.replace("<mailto:", "")
 	text = text.replace(">", "")
