@@ -246,83 +246,54 @@ def borderless():
 def pay():
 	start_time = time.time()
 
-	payment  = request.form.get('text')
-	response_url  = request.form.get('response_url')
-	
-	print(str(payment))
-	print(str(response_url))
-
-	if is_prod == 'True':
-		slack_id = request.form.get('user_id')
-		print("Live slack ID: " + str(slack_id))
-	else:
-		slack_id = 'UBH7TETRB'
-		print("Test slack ID: " + str(slack_id))
+	text  = request.form.get('text')
+	slack_id = request.form.get('user_id')
 
 	user = User.query.filter_by(slack_id=slack_id).first()
 
-	if user is None:
-		return 'Please connect your Slack account first at slackwise.herokuapp.com'
-	elif user.slack_token is None:
-		return 'Please connect your Slack account first at slackwise.herokuapp.com'
-	elif user.transferwise_token is None:
-		return 'Please connect your TransferWise account first using /transferwise'
+	if user is None or user.transferwise_token is None:
+		return 'Please connect your TransferWise account using /transerwise token'
 
-	print("Slack token: " + str(user.slack_token))
-	print("TransferWise token: " + str(user.transferwise_token))
-	
 	profileId = user.transferwise_profile_id
 
 	if profileId is None:
-		profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
+		return "Please update your TransferWise token first using /transferwise token"
 
-		if profiles.status_code == 401:
-			return "Please update your TransferWise token first using /transferwise"
+	text = text.split(' ')
 
-		if profiles.status_code == 401:
-			return str(profiles.error_message)
+	if len(text) < 3:
+		return 'Please use the format /pay email amount currency'
 
-		profileId = json.loads(profiles.text)[0]['id']
+	if len(text[0].split('@')) < 2:
+		return 'Please include a valid email'
+	
+	recipient_email = text[0]
 
-		user.tansferwise_profile_id = profileId
-		db.session.commit()
-
-
-	print("Profile ID: " + str(profileId))
-
-	end_time = time.time()
-	print("Profile Time: " + str(end_time - start_time))
-
-
-	payment = payment.split(' ')
-
-	if len(payment) < 3:
-		return 'Please use the format /pay @user amount currency'
-
-	if len(payment[0].split('@')) < 2:
-		return 'Please specify a Slack user'
-	else:
-		recipient_slack_id = payment[0].split('@')[1].split("|")[0]
-		print('Recipient slack ID: ' + str(recipient_slack_id))
-
-	amount = payment[1]
+	amount = text[1]
 	print('Amount: ' + str(amount))
 
-	currency = payment[2].upper()
+	currency = text[2].upper()
 	print('Currency: ' + str(currency))
 
-	recipient = User.query.filter_by(slack_id=recipient_slack_id).first()
+	name = recipient_email.split('@')[0].split('.')
 
-	first_name = recipient.email.split('@')[0].split('.')[0]
-	last_name = recipient.email.split('@')[0].split('.')[1]
+	if len(name) < 2:
+		first_name = name[0]
+		last_name = 'Unknown'
+
+	else:
+		first_name = name[0]
+		last_name = name[len(name)-1]
+
 	if len(last_name)<3:
-		last_name = first_name
+		last_name = 'Unknown'
 
 	name = first_name + ' ' + last_name
 	print('Name: ' + name)
 
-	recipient = createTransferWiseRecipient(email = recipient.email, currency = currency, name = name, legalType='PRIVATE', profileId = profileId, access_token = user.transferwise_token)
+	recipient = createTransferWiseRecipient(email = recipient_email, currency = currency, name = name, legalType='PRIVATE', profileId = profileId, access_token = user.transferwise_token)
 	print(recipient)
+
 	if recipient.status_code == 401:
 		return 'Your token is old, get a new one at http://moneytoemail.herokuapp.com/code and use "/transferwise token" to update'
 
