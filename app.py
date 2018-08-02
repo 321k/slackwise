@@ -400,11 +400,19 @@ def home_currency():
 
 @app.route('/latest', methods=['POST'])
 def lastest():
+	text = request.form.get('text')
+	if text is None:
+		limit = 5
+	elif text.isdigit():
+		limit = min(int(text), 10)
+	else:
+		limit = 5
+
 	slack_id = request.form.get('user_id')
 	user = User.query.filter_by(slack_id=slack_id).first()
 	#endDate = time.gmtime()
 	#startDate = time.gmtime()
-	transfers = getTransfers(limit = 5, offset = 0, accessToken = user.transferwise_token)
+	transfers = getTransfers(limit = limit, offset = 0, accessToken = user.transferwise_token)
 	transfers = json.loads(transfers.text)
 	text="Your five latest transfers: \n"
 	for b in transfers:
