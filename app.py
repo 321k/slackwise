@@ -430,10 +430,7 @@ def lastest():
 		elif activityType == 'WITHDRAWAL':
 			activityType = ':byebyemoney:'
 
-
-
-
-		text+= str(currency + b['amount']['value']) + " " + str(b['amount']['currency']) +  " " + activityType + " " + str(b['creationTime']) + " " + "\n"
+		text+= str(currency) + str(b['amount']['value']) + " " + str(b['amount']['currency']) +  " " + activityType + " " + str(b['creationTime']) + " " + "\n"
 
 	return str(text)
 
