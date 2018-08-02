@@ -240,7 +240,24 @@ def borderless():
 	accounts = json.loads(accounts.text)
 	text="Your balances are \n"
 	for b in accounts['balances']:
-		text+=str(b['amount']['value']) + " " + str(b['amount']['currency']) + "\n"
+
+		emoji = str(b['amount']['currency'])
+		if emoji == 'GBP':
+			emoji = ':uk:'
+		elif emoji == 'USD':
+			emoji = ':us:'
+		elif emoji == 'EUR':
+			emoji = ':euro:'
+		elif emoji == 'UAH':
+			emoji = ':ukraine:'
+		elif emoji == 'SEK':
+			emoji = ':flag-se:'
+		elif emoji == 'CAD':
+			emoji = ':flag-ca:'
+		else:
+			emoji = ':borderless:'
+
+		text+=emoji + " " + str(b['amount']['value']) + " " + str(b['amount']['currency']) + "\n"
 
 	return text
 
