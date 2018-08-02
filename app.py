@@ -415,11 +415,11 @@ def lastest():
 		currency = str(b['amount']['currency'])
 
 		if currency == 'USD':
-			currency = ':us:'
+			currency = ':us: '
 		elif currency == 'GBP':
-			currency = ':uk:'
+			currency = ':uk: '
 		elif currency == 'EUR':
-			currency = ':euro:'
+			currency = ':euro: '
 		else:
 			currency = ''
 
@@ -433,7 +433,7 @@ def lastest():
 
 
 
-		text+= str(currency + ' ' = b['amount']['value']) + " " + str(b['amount']['currency']) +  " " + activityType + " " + str(b['creationTime']) + " " + "\n"
+		text+= str(currency + b['amount']['value']) + " " + str(b['amount']['currency']) +  " " + activityType + " " + str(b['creationTime']) + " " + "\n"
 
 	return str(text)
 
