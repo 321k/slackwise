@@ -429,6 +429,7 @@ def lastest():
 
 	text="Your latest borderless activity: \n"
 	for b in activity:
+		print(str(b))
 		currency = str(b['amount']['currency'])
 
 		if currency == 'USD':
