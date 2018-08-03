@@ -456,7 +456,7 @@ def lastest():
 
 		elif  b['type'] == 'CONVERSION':
 			activityType = ':currency_exchange:'
-			text += activityType + str(b['sourceAmount']['value']) + " "  + str(b['sourceAmount']['currency']) + " to "  + str(b['targetAmount']['value']) + " "  + str(b['targetAmount']['currency'])
+			text += activityType + str(b['sourceAmount']['value']) + " "  + str(b['sourceAmount']['currency']) + " to "  + str(b['targetAmount']['value']) + " "  + str(b['targetAmount']['currency']) + '\n'
 
 		else:
 			text+= b['type'] + '\n'
