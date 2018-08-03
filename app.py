@@ -429,27 +429,38 @@ def lastest():
 
 	text="Your latest borderless activity: \n"
 	for b in activity:
-		print(str(b))
-		currency = str(b['amount']['currency'])
-
-		if currency == 'USD':
-			currency = ':us: '
-		elif currency == 'GBP':
-			currency = ':uk: '
-		elif currency == 'EUR':
-			currency = ':euro: '
-		else:
-			currency = ''
 
 		activityType = str(b['type'])
+		print(activityType)
+		
+		if b['type'] in ['WITHDRAWAL', 'DEPOSIT']
+			currency = str(b['amount']['currency'])
 
-		if activityType == 'DEPOSIT':
-			activityType = ':moneybag:'
-		elif activityType == 'WITHDRAWAL':
-			activityType = ':wave:'
+			if currency == 'USD':
+				currency = ':us: '
+			elif currency == 'GBP':
+				currency = ':uk: '
+			elif currency == 'EUR':
+				currency = ':euro: '
+			else:
+				currency = ''
 
-		text+= str(currency) + str(b['amount']['value']) + " " + str(b['amount']['currency']) +  " " + activityType + " " + str(b['type']) + " " + str(b['creationTime'])[0:10] + " " + str(b['creationTime'])[11:16] + "\n"
+			activityType = str(b['type'])
 
+			if activityType == 'DEPOSIT':
+				activityType = ':moneybag:'
+			elif activityType == 'WITHDRAWAL':
+				activityType = ':wave:'
+
+			text+= str(currency) + str(b['amount']['value']) + " " + str(b['amount']['currency']) +  " " + activityType + " " + str(b['type']) + " " + str(b['creationTime'])[0:10] + " " + str(b['creationTime'])[11:16] + "\n"
+
+		elif  b['type'] == 'CONVERSION':
+			activityType = ':currency_exchange:'
+			text += activityType + str(b['sourceAmount']['value']) + " "  + str(b['sourceAmount']['currency']) + " to "  + str(b['targetAmount']['value']) + " "  + str(b['targetAmount']['currency'])
+
+		else:
+			text+= b['type'] + '\n'
+			
 	return str(text)
 
 
