@@ -433,7 +433,7 @@ def lastest():
 		activityType = str(b['type'])
 		print(activityType)
 		
-		if b['type'] in ['WITHDRAWAL', 'DEPOSIT']
+		if b['type'] in ['WITHDRAWAL', 'DEPOSIT']:
 			currency = str(b['amount']['currency'])
 
 			if currency == 'USD':
