@@ -460,6 +460,9 @@ def profile():
 	user = User.query.filter_by(slack_id = slack_id).first()
 	profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
 
+	if(len(json.loads(profiles.text))==1):
+		return 'You only have one profile'
+
 	personalProfileId = json.loads(profiles.text)[0]['id']
 
 	if user.transferwise_profile_id == personalProfileId:
