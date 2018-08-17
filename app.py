@@ -456,14 +456,13 @@ def lastest():
 
 @app.route('/switch-profile', methods=['POST'])
 def profile():
-	text = = request.form.get('text')
 	slack_id = request.form.get('user_id')
 	user = User.query.filter_by(slack_id = slack_id).first()
 	profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
 
 	personalProfileId = json.loads(profiles.text)[0]['id']
 
-	if user.tranfserwise_profile_id == personalProfileId:
+	if user.transferwise_profile_id == personalProfileId:
 		user.transferwise_profile_id = json.loads(profiles.text)[1]['id']
 		db.session.commit()
 		return 'Active TransferWise profile: ' + json.loads(profiles.text)[1]['details']['name']
