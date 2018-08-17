@@ -158,15 +158,12 @@ def transferwiseToken():
 		user = User(slack_id = slack_id)
 		db.session.add(user)
 
-	print("Token: " + str(token))
 	profiles = getTransferWiseProfiles(access_token = token)
-	print(profiles.status_code)
 
 	if profiles.status_code == 401:
 		return str(json.loads(profiles.text))
 
 	profileId = json.loads(profiles.text)[0]['id']
-	print("Profile ID: " + str(json.loads(profiles.text)))
 
 	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = token)
 
@@ -174,7 +171,6 @@ def transferwiseToken():
 		return str(borderlessId.error_message)
 
 	borderlessId = json.loads(borderlessId.text)[0]['id']
-	print("Borderless ID: " + str(borderlessId))
 
 	accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = token)
 	
@@ -187,9 +183,6 @@ def transferwiseToken():
 	if sourceCurrency not in ['USD','AUD','BGN','BRL','CAD','CHF','CZK','DKK','EUR','GBP','HKD','HRK','HUF','JPY','NOK','NZD','PLN','RON','SEK','SGD','TRY']:
 		print("Source currency not valid, assuming GBP")
 		sourceCurrency = 'GBP'
-
-	print("Source currency: " + str(sourceCurrency))
-
 
 	user.transferwise_token = token
 	user.transferwise_profile_id = profileId
@@ -371,7 +364,6 @@ def pay():
 
 	else:
 		return 'Click here to pay: https://transferwise.com/transferFlow#/transfer/' + str(transferId)
-	
 
 @app.route('/homecurrency', methods=['POST'])
 def home_currency():
@@ -397,7 +389,6 @@ def home_currency():
 	db.session.commit()
 
 	return "Home currency updated"
-	
 
 @app.route('/latest', methods=['POST'])
 def lastest():
@@ -462,6 +453,26 @@ def lastest():
 			text+= b['type'] + '\n'
 			
 	return str(text)
+
+@app.route('/switch-profile', methods=['POST'])
+def profile():
+	text = = request.form.get('text')
+	slack_id = request.form.get('user_id')
+	user = User.query.filter_by(slack_id = slack_id).first()
+	profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
+
+	personalProfileId = json.loads(profiles.text)[0]['id']
+
+	if user.tranfserwise_profile_id == personalProfileId:
+		user.transferwise_profile_id = json.loads(profiles.text)[1]['id']
+		db.session.commit()
+		return 'Active TransferWise profile: ' + json.loads(profiles.text)[1]['details']['name']
+
+	else:
+		user.transferwise_profile_id = json.loads(profiles.text)[0]['id']
+		db.session.commit()
+		return 'Active TransferWise profile: ' + json.loads(profiles.text)[0]['details']['firstName'] + ' ' + json.loads(profiles.text)[0]['details']['lastName']
+
 
 
 if __name__ == '__main__':
