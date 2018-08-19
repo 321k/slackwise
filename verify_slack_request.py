@@ -27,7 +27,7 @@ def verify_slack_request(request):
 
 	if hmac.compare_digest(my_signature, slack_signature):
 		print("Verification succeeded.")
-		return True
+		return "Verification succeeded."
 	else:
 		print("Verification failed.")
-		return False
+		return "Verification failed."
