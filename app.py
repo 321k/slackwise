@@ -458,7 +458,8 @@ def lastest():
 
 @app.route('/switch-profile', methods=['POST'])
 def profile():
-	if verify_slack_request(request) == False:
+	print(str(request))
+	if not verify_slack_request(request):
 		return 'Request verification failed'
 
 	slack_id = request.form.get('user_id')
