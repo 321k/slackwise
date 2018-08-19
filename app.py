@@ -479,7 +479,12 @@ def profile():
 
 	slack_signature = request.headers['X-Slack-Signature']
 
-	if not hmac.compare_digest(my_signature, slack_signature):
+	print("My signature: " + str(my_signature))
+	print("Slack signature: " + str(slack_signature))
+
+	if hmac.compare_digest(my_signature, slack_signature):
+		print("Verification Succeeded.")
+	else:
 		print("Verification failed.")
 		return 'Verification failed'
 
