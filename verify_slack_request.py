@@ -7,6 +7,7 @@ import base64
 
 def verify_slack_request(request):
 	slack_signing_secret = os.environ.get('SLACK_SIGNING_SECRET', None)
+	is_prod = os.environ.get('IS_HEROKU', None)
 
 	timestamp = request.headers['X-Slack-Request-Timestamp']
 	if ((time.time() - int(timestamp)) > 60 * 5):
@@ -29,6 +30,9 @@ def verify_slack_request(request):
 	if hmac.compare_digest(my_signature, slack_signature):
 		print("Verification succeeded.")
 		return True
+	elif is_prod is None:
+		print("Verification failed, but continuing anyway since this is test environment.")
+		return True
 	else:
-		print("Verification failed.")
+		print("Verification failed")
 		return False
