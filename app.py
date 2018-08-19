@@ -124,6 +124,10 @@ def slack():
 
 @app.route('/transferwise', methods=['POST'])
 def transferwiseToken():
+	if not verify_slack_request(request):
+		return 'Request verification failed'
+
+
 	token  = request.form.get('text')
 	slack_id = request.form.get('user_id')
 
@@ -195,6 +199,10 @@ def transferwiseToken():
 
 @app.route('/balances', methods=['POST'])
 def borderless():
+	if not verify_slack_request(request):
+		return 'Request verification failed'
+
+
 	slack_id = request.form.get('user_id')
 	
 	user = User.query.filter_by(slack_id=slack_id).first()
@@ -259,6 +267,9 @@ def borderless():
 @app.route('/pay', methods=['POST'])
 def pay():
 	start_time = time.time()
+	if not verify_slack_request(request):
+		return 'Request verification failed'
+
 
 	text  = request.form.get('text')
 	print(text)
@@ -369,6 +380,9 @@ def pay():
 
 @app.route('/homecurrency', methods=['POST'])
 def home_currency():
+	if not verify_slack_request(request):
+		return 'Request verification failed'
+
 	home_currency  = request.form.get('text')
 	print(home_currency)
 
@@ -394,6 +408,9 @@ def home_currency():
 
 @app.route('/latest', methods=['POST'])
 def lastest():
+	if not verify_slack_request(request):
+		return 'Request verification failed'
+
 	text = request.form.get('text')
 	if text is None:
 		limit = 5
@@ -458,7 +475,6 @@ def lastest():
 
 @app.route('/switch-profile', methods=['POST'])
 def profile():
-	print(str(request.headers))
 	if not verify_slack_request(request):
 		return 'Request verification failed'
 
