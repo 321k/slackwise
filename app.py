@@ -8,16 +8,22 @@ from transferwiseclient.transferwiseclient import getTransferWiseProfiles, creat
 from model import db, User
 import time
 from datetime import datetime, timedelta
-
+import urllib
+import hmac
+import hashlib
+import base64
 
 #Declare global variables
 global slack_token
 global transferwise_token
+global slack_signing_secret
 
 #Environment variables
 is_prod = os.environ.get('IS_HEROKU', None)
 slack_token = os.environ.get('SLACK_TOKEN', None)
 port = int(os.environ.get('PORT', 5000))
+slack_signing_secret = os.environ.get('SLACK_SIGNING_SECRET', None)
+
 
 if is_prod == 'True':
   static_url = 'http://slackwise.herokuapp.com'
@@ -456,9 +462,31 @@ def lastest():
 
 @app.route('/switch-profile', methods=['POST'])
 def profile():
+	global slack_signing_secret
+
+	timestamp = request.headers['X-Slack-Request-Timestamp']
+	if ((time.time() - int(timestamp)) > 60 * 5):
+		return 'Error'
+
+	form_data = request.form.to_dict()
+	form_string = urllib.parse.urlencode(form_data)
+
+	message = 'v0:' + str(timestamp) + ":" + str(form_string)
+	message = message.encode('utf-8')
+
+	slack_signing_secret = bytes(slack_signing_secret, 'utf-8')
+	my_signature = 'v0=' + hmac.new(slack_signing_secret, msg=message, digestmod=hashlib.sha256).hexdigest()
+
+	slack_signature = request.headers['X-Slack-Signature']
+
+	if not hmac.compare_digest(my_signature, slack_signature):
+		print("Verification failed.")
+		return 'Verification failed'
+
 	slack_id = request.form.get('user_id')
 	user = User.query.filter_by(slack_id = slack_id).first()
 	profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
+
 
 	if(len(json.loads(profiles.text))==1):
 		return 'You only have one profile'
