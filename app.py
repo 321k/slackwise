@@ -8,7 +8,7 @@ from transferwiseclient.transferwiseclient import getTransferWiseProfiles, creat
 from model import db, User
 import time
 from datetime import datetime, timedelta
-import verify_slack_request
+from verify_slack_request import verify_slack_request
 
 #Declare global variables
 global slack_token
@@ -459,7 +459,7 @@ def lastest():
 @app.route('/switch-profile', methods=['POST'])
 def profile():
 	print(str(request.headers))
-	if verify_slack_request(request) === "Verification failed.":
+	if not verify_slack_request(request):
 		return 'Request verification failed'
 
 	slack_id = request.form.get('user_id')
