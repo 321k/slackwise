@@ -8,7 +8,7 @@ from transferwiseclient.transferwiseclient import getTransferWiseProfiles, creat
 from model import db, User
 import time
 from datetime import datetime, timedelta
-from verify_slack_request import verify_slack_request
+from slackwise_functions import verify_slack_request, currency_to_flag
 
 #Declare global variables
 global slack_token
@@ -236,23 +236,10 @@ def borderless():
 	text="Your balances are \n"
 	for b in accounts['balances']:
 
-		emoji = str(b['amount']['currency'])
-		if emoji == 'GBP':
-			emoji = ':uk:'
-		elif emoji == 'USD':
-			emoji = ':us:'
-		elif emoji == 'EUR':
-			emoji = ':euro:'
-		elif emoji == 'UAH':
-			emoji = ':ukraine:'
-		elif emoji == 'SEK':
-			emoji = ':flag-se:'
-		elif emoji == 'CAD':
-			emoji = ':flag-ca:'
-		else:
-			emoji = ':borderless:'
+		currency = str(b['amount']['currency'])
+		currency = currency_to_flag(currency)
 
-		text+=emoji + " " + str(b['amount']['value']) + " " + str(b['amount']['currency']) + "\n"
+		text+=currency + " " + str(b['amount']['value']) + " " + str(b['amount']['currency']) + "\n"
 
 	return text
 
@@ -427,12 +414,6 @@ def lastest():
 	activity = getBorderlessActivity(borderlessAccountId, user.transferwise_token)
 	activity = json.loads(activity.text)
 
-	print(activity[0])
-
-	#transfers = getTransfers(limit = limit, offset = 0, accessToken = user.transferwise_token, createdDateStart = str(endDate.date()), createdDateEnd = str(endDate.date()))
-	#transfers = json.loads(transfers.text)
-	#print(str(transfers))
-
 	text="Your latest borderless activity: \n"
 	for b in activity:
 
@@ -442,48 +423,7 @@ def lastest():
 		if b['type'] in ['WITHDRAWAL', 'DEPOSIT']:
 			currency = str(b['amount']['currency'])
 
-			if currency == 'USD':
-				currency = ':flag-us: '
-			elif currency == 'BGN':
-				currency = ':flag-bg:'
-			elif currency == 'BRL':
-				currency = ':flag-br:'
-			elif currency == 'CAD':
-				currency = ':flag-ca:'
-			elif currency == 'CHF':
-				currency = ':flag-ch:'
-			elif currency == 'CZK':
-				currency = ':flag-cz:'
-			elif currency == 'DKK':
-				currency = ':flag-dk:'
-			elif currency == 'EUR':
-				currency = ':flag-eu:'
-			elif currency == 'GBP':
-				currency = ':flag-uk:'
-			elif currency == 'HKD':
-				currency = ':flag-hk:'
-			elif currency == 'HRK':
-				currency = ':flag-ia:'
-			elif currency == 'HUF':
-				currency = ':flag-hu:'
-			elif currency == 'JPY':
-				currency = ':flag-jp:'
-			elif currency == 'NOK':
-				currency = ':flag-no:'
-			elif currency == 'NZD':
-				currency = ':flag-nz:'
-			elif currency == 'PLN':
-				currency = ':flag-pl:'
-			elif currency == 'RON':
-				currency = ':flag-ro:'
-			elif currency == 'SEK':
-				currency = ':flag-se:'
-			elif currency == 'SGD':
-				currency = ':flag-sg:'
-			elif currency == 'TRY':
-				currency = ':flag-tr:'
-			else:
-				currency = ''
+			currency = currency_to_flag(currency)
 
 			activityType = str(b['type'])
 
