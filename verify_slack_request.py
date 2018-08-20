@@ -9,8 +9,12 @@ def verify_slack_request(request):
 	slack_signing_secret = os.environ.get('SLACK_SIGNING_SECRET', None)
 	is_prod = os.environ.get('IS_HEROKU', None)
 
+	if 'X-Slack-Request-Timestamp' not in request.headers:
+		return 'Error'
+
 	timestamp = request.headers['X-Slack-Request-Timestamp']
-	if ((time.time() - int(timestamp)) > 60 * 5):
+
+	if is_prod == 'True' and (time.time() - int(timestamp) > 60 * 5):
 		return 'Error'
 
 	form_data = request.form.to_dict()
@@ -23,9 +27,6 @@ def verify_slack_request(request):
 	my_signature = 'v0=' + hmac.new(slack_signing_secret, msg=message, digestmod=hashlib.sha256).hexdigest()
 
 	slack_signature = request.headers['X-Slack-Signature']
-
-	print("My signature: " + str(my_signature))
-	print("Slack signature: " + str(slack_signature))
 
 	if hmac.compare_digest(my_signature, slack_signature):
 		print("Verification succeeded.")

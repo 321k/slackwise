@@ -65,6 +65,11 @@ port = int(os.environ.get('PORT', 5000))
 def index():
 	return render_template('index.html')
 
+@app.route('/privacy')
+def privacy():
+	return render_template('privacy-policy.html')
+
+
 @app.route('/slack')
 def slack():
 	if is_prod == 'True':
@@ -214,20 +219,7 @@ def borderless():
 	if user.transferwise_token is None:
 		return 'Please add your TransferWise token first using /transferwise token'
 
-	print("TransferWise token: " + str(user.transferwise_token))
-	#sc = SlackClient(user.slack_token)
-
-	profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
-	print("Profile ID: " + str(json.loads(profiles.text)))
-
-	if profiles.status_code == 401:
-		return "Please update your TransferWise token first using /transferwise"
-
-	if profiles.status_code != 200:
-		return str(profiles.error_message)
-	
-	profileId = json.loads(profiles.text)[0]['id']
-	borderless = getBorderlessAccountId(profileId = profileId, access_token = user.transferwise_token)
+	borderless = getBorderlessAccountId(profileId = user.transferwise_profile_id, access_token = user.transferwise_token)
 	
 	if borderless.status_code != 200:
 		return str(profiles.status_code)
@@ -386,6 +378,10 @@ def home_currency():
 	home_currency  = request.form.get('text')
 	print(home_currency)
 
+	if home_currency == "":
+		user = User.query.filter_by(slack_id=slack_id).first()
+		return user.home_currency
+
 	home_currency = home_currency.upper()
 
 	if home_currency not in ['USD','AUD','BGN','BRL','CAD','CHF','CZK','DKK','EUR','GBP','HKD','HRK','HUF','JPY','NOK','NZD','PLN','RON','SEK','SGD','TRY']:
@@ -447,11 +443,45 @@ def lastest():
 			currency = str(b['amount']['currency'])
 
 			if currency == 'USD':
-				currency = ':us: '
-			elif currency == 'GBP':
-				currency = ':uk: '
+				currency = ':flag-us: '
+			elif currency == 'BGN':
+				currency = 'flag-bg'
+			elif currency == 'BRL':
+				currency = 'flag-br'
+			elif currency == 'CAD':
+				currency = 'flag-ca'
+			elif currency == 'CHF':
+				currency = 'flag-ch'
+			elif currency == 'CZK':
+				currency = 'flag-cz'
+			elif currency == 'DKK':
+				currency = 'flag-dk'
 			elif currency == 'EUR':
-				currency = ':euro: '
+				currency = 'flag-eu'
+			elif currency == 'GBP':
+				currency = 'flag-uk'
+			elif currency == 'HKD':
+				currency = 'flag-hk'
+			elif currency == 'HRK':
+				currency = 'flag-ia'
+			elif currency == 'HUF':
+				currency = 'flag-hu'
+			elif currency == 'JPY':
+				currency = 'flag-jp'
+			elif currency == 'NOK':
+				currency = 'flag-no'
+			elif currency == 'NZD':
+				currency = 'flag-nz'
+			elif currency == 'PLN':
+				currency = 'flag-pl'
+			elif currency == 'RON':
+				currency = 'flag-ro'
+			elif currency == 'SEK':
+				currency = 'flag-se'
+			elif currency == 'SGD':
+				currency = 'flag-sg'
+			elif currency == 'TRY':
+				currency = 'flag-tr'
 			else:
 				currency = ''
 
@@ -480,11 +510,15 @@ def profile():
 
 	slack_id = request.form.get('user_id')
 	user = User.query.filter_by(slack_id = slack_id).first()
+	print('Previous TransferWise profile: ' + str(user.transferwise_profile_id))
 	profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
 
+	if profiles.status_code != 200:
+		print(str(profiles.status_code))
+		return 'Error.'
 
 	if(len(json.loads(profiles.text))==1):
-		return 'You only have one profile'
+		return 'You only have one profile.'
 
 	personalProfileId = json.loads(profiles.text)[0]['id']
 
@@ -497,6 +531,17 @@ def profile():
 		user.transferwise_profile_id = json.loads(profiles.text)[0]['id']
 		db.session.commit()
 		return 'Active TransferWise profile: ' + json.loads(profiles.text)[0]['details']['firstName'] + ' ' + json.loads(profiles.text)[0]['details']['lastName']
+
+@app.route('/transferwise-bot-feedback')
+def feedback():
+	if not verify_slack_request(request):
+		return 'Request verification failed'
+
+	text = request.form.get('text')
+	print('Feedback: ' + text)
+	return 'Thank you for your feedback'
+
+
 
 
 
