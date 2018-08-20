@@ -85,6 +85,8 @@ def currency_to_flag(currency):
 		currency = ':flag-sg:'
 	elif currency == 'TRY':
 		currency = ':flag-tr:'
+	elif currency == 'UAH':
+		currency = ':flag-ua:'
 	elif currency == 'ZAR':
 		currency = ':flag-za:'
 	else:
