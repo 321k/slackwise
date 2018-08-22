@@ -472,13 +472,13 @@ def profile():
 		db.session.commit()
 		return 'Active TransferWise profile: ' + json.loads(profiles.text)[0]['details']['firstName'] + ' ' + json.loads(profiles.text)[0]['details']['lastName']
 
-@app.route('/transferwise-bot-feedback')
+@app.route('/transferwise-bot-feedback', methods=['POST'])
 def feedback():
 	if not verify_slack_request(request):
 		return 'Request verification failed'
 
 	text = request.form.get('text')
-	print('Feedback: ' + text)
+	print('Feedback: ' + str(text))
 	return 'Thank you for your feedback'
 
 
