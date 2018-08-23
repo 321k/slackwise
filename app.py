@@ -153,7 +153,7 @@ def transferwiseToken():
 		if user is None:
 			user = User(slack_id = slack_id)
 			db.session.add(user)
-			return 'Please provide a TransferWise API key /transferwise api_key'
+			return 'Click here to connect your TransferWise account https://moneytoemail.herokuapp.com/code'
 
 		if user.transferwise_token is not None:
 			token = user.transferwise_token
