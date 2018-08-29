@@ -139,6 +139,8 @@ def transferwiseToken():
 		if slack_id is None:
 			return 'No slack ID found in session'
 
+		return_message = 'You can now use the TransferWise slack bot. <a href="#" onclick="close_window();return false;">Close page.</a>'
+
 	else:
 		token  = request.form.get('text')
 		slack_id = request.form.get('user_id')
@@ -162,6 +164,8 @@ def transferwiseToken():
 				db.session.delete(user)
 				db.session.commit()
 				return 'Token deleted'
+
+		return_message = 'You can now use the TransferWise slack bot'
 
 
 	user = User.query.filter_by(slack_id=slack_id).first()
@@ -225,7 +229,7 @@ def transferwiseToken():
 	user.home_currency = sourceCurrency
 	db.session.commit()
 
-	return 'You can now use the TransfeWise bot. <a href="#" onclick="close_window();return false;">close</a>'
+	return return_message
 
 @app.route('/connect', methods=['GET'])
 def connect():
