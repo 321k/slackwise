@@ -392,7 +392,7 @@ def pay():
 	else:
 		return 'Click here to pay: https://transferwise.com/transferFlow#/transfer/' + str(transferId)
 
-@app.route('/homecurrency', methods=['POST'])
+@app.route('/home-currency', methods=['POST'])
 def home_currency():
 	if not verify_slack_request(request):
 		return 'Request verification failed'
