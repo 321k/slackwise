@@ -139,7 +139,7 @@ def transferwiseToken():
 		if slack_id is None:
 			return 'No slack ID found in session'
 
-		return_message = render_template(url_for('index'))
+		return_message = render_template('index.html')
 
 	else:
 		token  = request.form.get('text')
