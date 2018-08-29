@@ -142,7 +142,7 @@ def transferwiseToken():
 	else:
 		token  = request.form.get('text')
 		slack_id = request.form.get('user_id')
-		session['slack_id'] = slack_id
+
 
 		# If the slack id is none, attempt to find it in the session
 		if slack_id is None:
@@ -171,7 +171,7 @@ def transferwiseToken():
 		if user is None:
 			user = User(slack_id = slack_id)
 			db.session.add(user)
-			return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect'
+			return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect?slack_id='+slack_id
 
 		if user.transferwise_token is not None:
 			token = user.transferwise_token
@@ -180,7 +180,7 @@ def transferwiseToken():
 			print('Profiles: ' + str(json.loads(profiles.text)))
 
 			if profiles.status_code == 401:
-				return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect'
+				return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect?slack_id='+slack_id
 
 	# Check that the user has connected their Slack account
 	if user is None:
@@ -222,7 +222,7 @@ def transferwiseToken():
 
 @app.route('/connect', methods=['GET'])
 def connect():
-	slack_id = request.form.get('user_id')
+	slack_id = request.args.get('slack_id')
 	session['slack_id'] = slack_id
 	return redirect('https://api.transferwise.com/oauth/authorize?response_type=code&client_id=tw-test-erik.johansson&redirect_uri=https://moneytoemail.herokuapp.com/transferwise')
 
