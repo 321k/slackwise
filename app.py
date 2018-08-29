@@ -136,6 +136,15 @@ def transferwiseToken():
 	token  = request.form.get('text')
 	slack_id = request.form.get('user_id')
 
+	# If the slack id is none, attempt to find it in the session
+	if slack_id is None:
+		slack_id = session['slack_id']
+		print('Slack ID retrieved from session: ' + str(slack_id))
+
+	# If the slack id is still none, something is wrong, return error
+	if slack_id is None:
+		return 'Invalid request'
+
 	if token == 'delete':
 		print('Deleting user ' + slack_id)
 		user = User.query.filter_by(slack_id = slack_id).first()
@@ -153,7 +162,7 @@ def transferwiseToken():
 		if user is None:
 			user = User(slack_id = slack_id)
 			db.session.add(user)
-			return 'Click here to connect your TransferWise account https://moneytoemail.herokuapp.com/code'
+			return 'Click here to connect your TransferWise account https://api.transferwise.com/oauth/authorize?response_type=code&client_id=tw-test-erik.johansson&redirect_uri=https://moneytoemail.herokuapp.com/transferwise'
 
 		if user.transferwise_token is not None:
 			token = user.transferwise_token
@@ -162,7 +171,7 @@ def transferwiseToken():
 			print('Profiles: ' + str(json.loads(profiles.text)))
 
 			if profiles.status_code == 401:
-				return 'Your token is old, please provide a new one.'
+				return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect'
 
 	# Check that the user has connected their Slack account
 	if user is None:
@@ -201,6 +210,12 @@ def transferwiseToken():
 	db.session.commit()
 
 	return 'You can now use the TransfeWise bot.'
+
+@app.route('/connect', methods=['GET'])
+def connect():
+	slack_id = request.form.get('user_id')
+	session['slack_id'] = slack_id
+	redirect('https://moneytoemail.herokuapp.com/code')
 
 @app.route('/balances', methods=['POST'])
 def borderless():
