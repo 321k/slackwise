@@ -135,12 +135,14 @@ def transferwiseToken():
 	if request.method == 'GET':
 		token = request.args.get('token')
 		slack_id = session['slack_id']
+
 		if slack_id is None:
 			return 'No slack ID found in session'
 
 	else:
 		token  = request.form.get('text')
 		slack_id = request.form.get('user_id')
+		session['slack_id'] = slack_id
 
 		# If the slack id is none, attempt to find it in the session
 		if slack_id is None:
