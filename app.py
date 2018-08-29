@@ -184,6 +184,7 @@ def transferwiseToken():
 
 	# Check that the user has connected their Slack account
 	if user is None:
+		print('Adding user with ID ' + slack_id)
 		user = User(slack_id = slack_id)
 		db.session.add(user)
 
@@ -195,6 +196,8 @@ def transferwiseToken():
 	profileId = json.loads(profiles.text)[0]['id']
 
 	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = token)
+
+	print(borderlessId)
 
 	if borderlessId.status_code == 401:
 		return str(borderlessId.error_message)
