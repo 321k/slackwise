@@ -127,33 +127,40 @@ def slack():
 
 	return redirect(url_for('index'))
 
-@app.route('/transferwise', methods=['POST'])
+@app.route('/transferwise', methods=['GET', 'POST'])
 def transferwiseToken():
 	if not verify_slack_request(request):
 		return 'Request verification failed'
 
-
-	token  = request.form.get('text')
-	slack_id = request.form.get('user_id')
-
-	# If the slack id is none, attempt to find it in the session
-	if slack_id is None:
+	if request.method == 'GET':
+		token = request.args.get('token')
 		slack_id = session['slack_id']
-		print('Slack ID retrieved from session: ' + str(slack_id))
+		if slack_id is None:
+			return 'No slack ID found in session'
 
-	# If the slack id is still none, something is wrong, return error
-	if slack_id is None:
-		return 'Invalid request'
+	else:
+		token  = request.form.get('text')
+		slack_id = request.form.get('user_id')
 
-	if token == 'delete':
-		print('Deleting user ' + slack_id)
-		user = User.query.filter_by(slack_id = slack_id).first()
-		if user is None:
-			return 'Token deleted'
-		else:
-			db.session.delete(user)
-			db.session.commit()
-			return 'Token deleted'
+		# If the slack id is none, attempt to find it in the session
+		if slack_id is None:
+			slack_id = session['slack_id']
+			print('Slack ID retrieved from session: ' + str(slack_id))
+
+		# If the slack id is still none, something is wrong, return error
+		if slack_id is None:
+			return 'Invalid request'
+
+		if token == 'delete':
+			print('Deleting user ' + slack_id)
+			user = User.query.filter_by(slack_id = slack_id).first()
+			if user is None:
+				return 'Token deleted'
+			else:
+				db.session.delete(user)
+				db.session.commit()
+				return 'Token deleted'
+
 
 	user = User.query.filter_by(slack_id=slack_id).first()
 
@@ -171,7 +178,7 @@ def transferwiseToken():
 			print('Profiles: ' + str(json.loads(profiles.text)))
 
 			if profiles.status_code == 401:
-				return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect'
+				return 'Click here to connect your TransferWise account https://api.transferwise.com/oauth/authorize?response_type=code&client_id=tw-test-erik.johansson&redirect_uri=https://moneytoemail.herokuapp.com/transferwise'
 
 	# Check that the user has connected their Slack account
 	if user is None:
