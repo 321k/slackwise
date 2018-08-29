@@ -187,6 +187,7 @@ def transferwiseToken():
 		print('Adding user with ID ' + slack_id)
 		user = User(slack_id = slack_id)
 		db.session.add(user)
+		db.session.commit()
 
 	profiles = getTransferWiseProfiles(access_token = token)
 
