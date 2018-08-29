@@ -222,7 +222,7 @@ def transferwiseToken():
 def connect():
 	slack_id = request.form.get('user_id')
 	session['slack_id'] = slack_id
-	redirect('https://api.transferwise.com/oauth/authorize?response_type=code&client_id=tw-test-erik.johansson&redirect_uri=https://moneytoemail.herokuapp.com/transferwise')
+	return redirect('https://api.transferwise.com/oauth/authorize?response_type=code&client_id=tw-test-erik.johansson&redirect_uri=https://moneytoemail.herokuapp.com/transferwise')
 
 @app.route('/balances', methods=['POST'])
 def borderless():
