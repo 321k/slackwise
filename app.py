@@ -225,7 +225,7 @@ def transferwiseToken():
 	user.home_currency = sourceCurrency
 	db.session.commit()
 
-	return 'You can now use the TransfeWise bot. <a href="javascript:close_window();">Close this window.</a>'
+	return 'You can now use the TransfeWise bot. <a href="#" onclick="close_window();return false;">close</a>'
 
 @app.route('/connect', methods=['GET'])
 def connect():
