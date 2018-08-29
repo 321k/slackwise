@@ -139,7 +139,7 @@ def transferwiseToken():
 		if slack_id is None:
 			return 'No slack ID found in session'
 
-		return_message = 'You can now use the TransferWise slack bot. <a href="#" onclick="close_window();return false;">Close page.</a>'
+		return_message = '<script>close();</script>'
 
 	else:
 		token  = request.form.get('text')
