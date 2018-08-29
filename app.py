@@ -197,10 +197,13 @@ def transferwiseToken():
 
 	borderlessId = getBorderlessAccountId(profileId = profileId, access_token = token)
 
-	print(borderlessId)
+	print(str(json.loads(borderlessId.text)))
 
 	if borderlessId.status_code == 401:
 		return str(borderlessId.error_message)
+
+	if len(json.loads(borderlessId.text)) < 1:
+		return 'You need to have a borderless account to use the Slack bot'
 
 	borderlessId = json.loads(borderlessId.text)[0]['id']
 
