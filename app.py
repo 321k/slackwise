@@ -133,7 +133,7 @@ def transferwiseToken():
 		return 'Request verification failed'
 
 	if request.method == 'GET':
-		token = request.args.get('token')
+		text = request.args.get('token')
 		slack_id = session['slack_id']
 
 		if slack_id is None:
@@ -171,6 +171,7 @@ def transferwiseToken():
 	user = User.query.filter_by(slack_id=slack_id).first()
 
 	# Check that the user has a valid token
+	token = text
 	if token is None or len(token)<5:	
 		if user is None:
 			user = User(slack_id = slack_id)
