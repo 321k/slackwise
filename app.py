@@ -142,30 +142,30 @@ def transferwiseToken():
 		return_message = render_template('index.html')
 
 	else:
-		token  = request.form.get('text')
+		text  = request.form.get('text')
 		slack_id = request.form.get('user_id')
+#
+#
+#		# If the slack id is none, attempt to find it in the session
+#		if slack_id is None:
+#			slack_id = session['slack_id']
+#			print('Slack ID retrieved from session: ' + str(slack_id))
+#
+#		# If the slack id is still none, something is wrong, return error
+#		if slack_id is None:
+#			return 'Invalid request'
 
-
-		# If the slack id is none, attempt to find it in the session
-		if slack_id is None:
-			slack_id = session['slack_id']
-			print('Slack ID retrieved from session: ' + str(slack_id))
-
-		# If the slack id is still none, something is wrong, return error
-		if slack_id is None:
-			return 'Invalid request'
-
-		if token == 'delete':
+		if text == 'delete':
 			print('Deleting user ' + slack_id)
 			user = User.query.filter_by(slack_id = slack_id).first()
 			if user is None:
-				return 'Token deleted'
+				return 'TransferWise integration removed. Use /transferwise to reconnect.'
 			else:
 				db.session.delete(user)
 				db.session.commit()
-				return 'Token deleted'
+				return 'TransferWise integration removed. Use /transferwise to reconnect.'
 
-		return_message = 'You can now use the TransferWise slack bot'
+		return_message = 'You can now use the TransferWise Slack bot'
 
 
 	user = User.query.filter_by(slack_id=slack_id).first()
