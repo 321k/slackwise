@@ -138,6 +138,12 @@ def oauth():
                                    'redirect_uri':'https://slackwise.herokuapp.com/oauth'},
                           headers={'Authorization':'Basic ' + str(api_key)})
 
+    if token.status_code == 401:
+    	return json.loads(token.text)['error']
+
+    else:
+    	token = json.loads(token.text)['access_token']
+
     if slack_id is None:
         return 'You need to use this bot via Slack for it to work.'
 
