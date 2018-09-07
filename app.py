@@ -196,6 +196,7 @@ def transferwiseToken():
 
     text  = request.form.get('text')
     slack_id = request.form.get('user_id')
+    session['slack_id'] = slack_id
 
     if text == 'delete':
         print('Deleting user ' + slack_id)
