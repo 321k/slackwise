@@ -130,8 +130,8 @@ def slack():
 @app.route('/oauth')
 def oauth():
     global api_key
-    print(session.values())
-    if 'slack_id' in session.values():
+    print(session.keys())
+    if 'slack_id' in session.keys():
         slack_id = session['slack_id']
     else:
         return 'No valid user. Please use the bot from within Slack.'
