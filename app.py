@@ -13,6 +13,7 @@ from slackwise_functions import verify_slack_request, currency_to_flag
 #Declare global variables
 global slack_token
 global transferwise_token
+global api_key
 
 #Environment variables
 is_prod = os.environ.get('IS_HEROKU', None)
@@ -68,7 +69,6 @@ def index():
 @app.route('/privacy')
 def privacy():
     return render_template('privacy-policy.html')
-
 
 @app.route('/slack')
 def slack():
@@ -129,8 +129,8 @@ def slack():
 
 @app.route('/oauth')
 def oauth():
-    print('Oauth flow start')
-    print('API key ' + str(api_key))
+    global transferwise_token
+
     slack_id = session['slack_id']
     code = request.args.get('code')
     token = requests.post('https://api.transferwise.com/oauth/token',
@@ -548,9 +548,21 @@ def feedback():
     print('Feedback: ' + str(text))
     return 'Thank you for your feedback'
 
+@app.route('/addkey', methods=['GET'])
+def addtoken():
+    if is_prod == 'True':
+        return 'This endpoint is not available in production'
+
+    global api_key
+    api_key = request.args.get('key')
+    return 'Key added'
+
+
+
 
 
 
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=port)
+
