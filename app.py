@@ -129,6 +129,7 @@ def slack():
 
 @app.route('/oauth')
 def oauth():
+	print('Oauth flow start')
     slack_id = session['slack_id']
     code = request.args.get('code')
     token = requests.post('https://api.transferwise.com/oauth/token',
