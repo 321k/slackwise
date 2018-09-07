@@ -130,6 +130,7 @@ def slack():
 @app.route('/oauth')
 def oauth():
     print('Oauth flow start')
+    print('API key ' + str(api_key))
     slack_id = session['slack_id']
     code = request.args.get('code')
     token = requests.post('https://api.transferwise.com/oauth/token',
@@ -140,7 +141,7 @@ def oauth():
                           headers={'Authorization':'Basic ' + str(api_key)})
 
     if token.status_code == 401:
-    	return json.loads(token.text)['error']
+        return json.loads(token.text)['error']
 
     else:
     	token = json.loads(token.text)['access_token']
@@ -184,87 +185,46 @@ def oauth():
 
     return render_template('index.html')
 
-
-
-
-
-@app.route('/transferwise', methods=['GET', 'POST'])
+@app.route('/transferwise', methods=['POST'])
 def transferwiseToken():
     if not verify_slack_request(request):
         return 'Request verification failed'
 
-    if request.method == 'GET':
-        text = request.args.get('token')
-        slack_id = session['slack_id']
+    text  = request.form.get('text')
+    slack_id = request.form.get('user_id')
 
-        if slack_id is None:
-            return 'No slack ID found in session'
-
-        return_message = render_template('index.html')
-
-    else:
-        text  = request.form.get('text')
-        slack_id = request.form.get('user_id')
-#
-#
-#        # If the slack id is none, attempt to find it in the session
-#        if slack_id is None:
-#            slack_id = session['slack_id']
-#            print('Slack ID retrieved from session: ' + str(slack_id))
-#
-#        # If the slack id is still none, something is wrong, return error
-#        if slack_id is None:
-#            return 'Invalid request'
-
-        if text == 'delete':
-            print('Deleting user ' + slack_id)
-            user = User.query.filter_by(slack_id = slack_id).first()
-            if user is None:
-                return 'TransferWise integration removed. Use /transferwise to reconnect.'
-            else:
-                db.session.delete(user)
-                db.session.commit()
-                return 'TransferWise integration removed. Use /transferwise to reconnect.'
-
-        return_message = 'You can now use the TransferWise Slack bot'
-
+    if text == 'delete':
+        print('Deleting user ' + slack_id)
+        user = User.query.filter_by(slack_id = slack_id).first()
+        if user is None:
+            return 'TransferWise integration removed. Use /transferwise to reconnect.'
+        else:
+            db.session.delete(user)
+            db.session.commit()
+            return 'TransferWise integration removed. Use /transferwise to reconnect.'
 
     user = User.query.filter_by(slack_id=slack_id).first()
 
-    # Check that the user has a valid token
-    token = text
-    if token is None or len(token)<5:    
-        if user is None:
-            user = User(slack_id = slack_id)
-            db.session.add(user)
-            return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect?slack_id='+slack_id
-
-        if user.transferwise_token is not None:
-            token = user.transferwise_token
-            profiles = getTransferWiseProfiles(access_token = token)
-            print(profiles.status_code)
-            print('Profiles: ' + str(json.loads(profiles.text)))
-
-            if profiles.status_code == 401:
-                return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect?slack_id='+slack_id
-
-    # Check that the user has connected their Slack account
     if user is None:
-        print('Adding user with ID ' + slack_id)
         user = User(slack_id = slack_id)
         db.session.add(user)
-        db.session.commit()
+        return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect?slack_id='+slack_id
+
+    token = user.transferwise_token
+
+    if user.transferwise_token is None:
+        return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect?slack_id='+slack_id
+    else:
+        token = user.transferwise_token
 
     profiles = getTransferWiseProfiles(access_token = token)
 
     if profiles.status_code == 401:
-        return str(json.loads(profiles.text))
+        return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect?slack_id='+slack_id
 
     profileId = json.loads(profiles.text)[0]['id']
 
     borderlessId = getBorderlessAccountId(profileId = profileId, access_token = token)
-
-    print(str(json.loads(borderlessId.text)))
 
     if borderlessId.status_code == 401:
         return str(borderlessId.error_message)
@@ -274,13 +234,16 @@ def transferwiseToken():
 
     borderlessId = json.loads(borderlessId.text)[0]['id']
 
-    accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = token)
+    response = getBorderlessAccounts(borderlessId = borderlessId, access_token = token)
     
-    if accounts.status_code == 200:
-        accounts = json.loads(accounts.text)
+    if response.status_code == 200:
+        accounts = json.loads(response.text)
 
         # The first record has the highest balance, so we'll default to that
         sourceCurrency = accounts['balances'][0]['amount']['currency']
+
+    if response.status_code == 401:
+        return str(response.error_message)
 
     if sourceCurrency not in ['USD','AUD','BGN','BRL','CAD','CHF','CZK','DKK','EUR','GBP','HKD','HRK','HUF','JPY','NOK','NZD','PLN','RON','SEK','SGD','TRY']:
         print("Source currency not valid, assuming GBP")
@@ -291,7 +254,7 @@ def transferwiseToken():
     user.home_currency = sourceCurrency
     db.session.commit()
 
-    return return_message
+    return 'Your TransferWise account is connected'
 
 @app.route('/connect', methods=['GET'])
 def connect():
