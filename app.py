@@ -130,8 +130,12 @@ def slack():
 @app.route('/oauth')
 def oauth():
     global api_key
+    print(session.values())
+    if 'slack_id' in session.values():
+        slack_id = session['slack_id']
+    else:
+        return 'No valid user. Please use the bot from within Slack.'
 
-    slack_id = session['slack_id']
     code = request.args.get('code')
     token = requests.post('https://api.transferwise.com/oauth/token',
                           data = {'grant_type': 'authorization_code',
