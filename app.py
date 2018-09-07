@@ -129,7 +129,7 @@ def slack():
 
 @app.route('/oauth')
 def oauth():
-    global transferwise_token
+    global api_key
 
     slack_id = session['slack_id']
     code = request.args.get('code')
@@ -549,7 +549,7 @@ def feedback():
     return 'Thank you for your feedback'
 
 @app.route('/addkey', methods=['GET'])
-def addtoken():
+def addkey():
     if is_prod == 'True':
         return 'This endpoint is not available in production'
 
