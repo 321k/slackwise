@@ -36,8 +36,6 @@ def create_app():
 
 app = create_app()
 
-Session(app)
-
 #Congiguring database
 if is_prod == 'True':
   POSTGRES = {
