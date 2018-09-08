@@ -3,6 +3,7 @@ from flask import Flask, render_template, url_for, request, redirect, session
 import os
 import requests
 import json
+import base64
 from slackclient import SlackClient
 from transferwiseclient.transferwiseclient import getTransferWiseProfiles, createTransferWiseRecipient, createTransferWiseQuote, createPayment, getBorderlessAccountId, getBorderlessAccounts, getTransfers, getBorderlessActivity
 from model import db, User
@@ -133,7 +134,12 @@ def oauth():
     print('Keys: ' + str(session.keys()))
     print('Values: ' + str(session.values()))
     print('Session: ' + str(session))
-    print('Request cookie: ' + str(request.cookies))
+    print('Request cookie: ' + str(request.cookies['session']))
+    print('Request cookie: ' + str(request.cookies.session))
+
+    print(str(base64.encodestring(request.cookies['session'].split(".")[0])))
+
+
 
     if 'slack_id' in session:
         slack_id = session['slack_id']
