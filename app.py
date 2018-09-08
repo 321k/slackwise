@@ -131,6 +131,8 @@ def slack():
 def oauth():
     global api_key
     print(session.keys())
+    print('API key: ' + api_key)
+    
     if 'slack_id' in session.keys():
         slack_id = session['slack_id']
     else:
