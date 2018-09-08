@@ -137,11 +137,12 @@ def oauth():
     print('Request cookie: ' + str(request.cookies['session']))
     print(request.cookies['session'])
     
-    print(str(base64.b64decode(request.cookies['session'].split(".")[0])))
+    request_session = json.loads(base64.b64decode(request.cookies['session'].split(".")[0]))
+    print(request_session)
 
 
-    if 'slack_id' in session:
-        slack_id = session['slack_id']
+    if 'slack_id' in request_session:
+        slack_id = request_session['slack_id']
 
     else:
         return 'No valid user. Please use the bot from within Slack.'
