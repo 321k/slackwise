@@ -133,6 +133,7 @@ def oauth():
     print('Keys: ' + str(session.keys()))
     print('Values: ' + str(session.values()))
     print('Session: ' + str(session))
+    print('Request cookie: ' + str(request.cookies))
 
     if 'slack_id' in session:
         slack_id = session['slack_id']
