@@ -13,9 +13,6 @@ class BaseModel(db.Model):
     def __init__(self, *args):
         super().__init__(*args)
 
-    def __repr__(self):
-        return self.__str__()
-
 class User(BaseModel):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -34,4 +31,12 @@ class User(BaseModel):
         self.email = email
         self.transferwise_profile_id = transferwise_profile_id
         self.home_currency = home_currency
+
+    def __repr__(self):
+        return json.dump({'slack_id' : self.slack_id,
+        'slack_token' : self.slack_token,
+        'transferwise_token' : self.transferwise_token,
+        'email' : self.email,
+        'transferwise_profile_id' : self.transferwise_profile_id,
+        'home_currency' : self.home_currency})
 
