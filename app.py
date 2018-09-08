@@ -131,13 +131,14 @@ def slack():
 def oauth():
     global api_key
     print(session.keys())
-    print('API key: ' + api_key)
-    
+    print('API key: ' + str(api_key))
+
     if 'slack_id' in session.keys():
         slack_id = session['slack_id']
+
     else:
         return 'No valid user. Please use the bot from within Slack.'
-
+    
     code = request.args.get('code')
     token = requests.post('https://api.transferwise.com/oauth/token',
                           data = {'grant_type': 'authorization_code',
@@ -147,6 +148,7 @@ def oauth():
                           headers={'Authorization':'Basic ' + str(api_key)})
 
     if token.status_code == 401:
+        print('Token exchange failed')
         return json.loads(token.text)['error']
 
     else:
@@ -184,6 +186,7 @@ def oauth():
         print("Source currency not valid, assuming GBP")
         sourceCurrency = 'GBP'
 
+    user = User.query.filter_by(slack_id=slack_id).first()
     user.transferwise_token = token
     user.transferwise_profile_id = profileId
     user.home_currency = sourceCurrency
@@ -201,7 +204,7 @@ def transferwiseToken():
     session['slack_id'] = slack_id
 
     if text == 'delete':
-        print('Deleting user ' + slack_id)
+        print('Deleting user ' + str(slack_id))
         user = User.query.filter_by(slack_id = slack_id).first()
         if user is None:
             return 'TransferWise integration removed. Use /transferwise to reconnect.'
@@ -215,19 +218,19 @@ def transferwiseToken():
     if user is None:
         user = User(slack_id = slack_id)
         db.session.add(user)
-        return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect?slack_id='+slack_id
+        return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect'
 
     token = user.transferwise_token
 
     if user.transferwise_token is None:
-        return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect?slack_id='+slack_id
+        return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect'
     else:
         token = user.transferwise_token
 
     profiles = getTransferWiseProfiles(access_token = token)
 
     if profiles.status_code == 401:
-        return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect?slack_id='+slack_id
+        return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect'
 
     profileId = json.loads(profiles.text)[0]['id']
 
@@ -265,8 +268,6 @@ def transferwiseToken():
 
 @app.route('/connect', methods=['GET'])
 def connect():
-    slack_id = request.args.get('slack_id')
-    session['slack_id'] = slack_id
     return redirect('https://api.transferwise.com/oauth/authorize?response_type=code&client_id=erik-edins-slack-bot&redirect_uri=https://slackwise.herokuapp.com/oauth')
 
 @app.route('/balances', methods=['POST'])
@@ -563,10 +564,6 @@ def addkey():
     global api_key
     api_key = request.args.get('key')
     return 'Key added'
-
-
-
-
 
 
 
