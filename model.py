@@ -33,5 +33,5 @@ class User(BaseModel):
         self.transferwise_token = transferwise_token
         self.email = email
         self.transferwise_profile_id = transferwise_profile_id
-        self.home_currency = home_currenc
+        self.home_currency = home_currency
 
