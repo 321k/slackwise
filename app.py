@@ -205,7 +205,7 @@ def oauth():
     user.home_currency = sourceCurrency
     db.session.commit()
 
-    flash('You were successfully logged in')
+    flash('Your TransferWise account is set up. Go back to Slack to continue using the TransferWise Slack bot.')
 
     return render_template('index.html')
 
