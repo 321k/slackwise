@@ -133,15 +133,15 @@ def oauth():
     global api_key
     print('Keys: ' + str(session.keys()))
     print('Values: ' + str(session.values()))
-    print('Session: ' + str(session))
     print('Request cookie: ' + str(request.cookies['session']))
-    print(request.cookies['session'])
     
     request_session = json.loads(base64.b64decode(request.cookies['session'].split(".")[0]))
     print(request_session)
 
-
-    if 'slack_id' in request_session:
+    if 'slack_id' in session:
+        slack_id = request_session['slack_id']
+    
+    elif 'slack_id' in request_session:
         slack_id = request_session['slack_id']
 
     else:
@@ -489,7 +489,7 @@ def lastest():
     if len(json.loads(borderlessId.text)) < 1:
         return 'You need to have a borderless account to use the Slack bot'
 
-    if accounts.status_code != 200:
+    if borderlessId.status_code != 200:
         return str(profiles.status_code)
 
     borderlessAccountId = json.loads(borderlessId.text)[0]['id']
