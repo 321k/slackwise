@@ -33,7 +33,7 @@ class User(BaseModel):
         self.home_currency = home_currency
 
     def __repr__(self):
-        return json.dump({'slack_id' : self.slack_id,
+        return json.dumps({'slack_id' : self.slack_id,
         'slack_token' : self.slack_token,
         'transferwise_token' : self.transferwise_token,
         'email' : self.email,
