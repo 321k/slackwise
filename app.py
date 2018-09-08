@@ -136,13 +136,12 @@ def oauth():
 
     global api_key
 
-    if session in request.cookies:
+    if 'session' in request.cookies:
         request_session = json.loads(base64.b64decode(request.cookies['session'].split(".")[0]))
         print(request_session)
 
         if 'slack_id':
             slack_id = request_session['slack_id']
-
 
     elif 'slack_id' in session:
         slack_id = session['slack_id']
@@ -240,7 +239,7 @@ def transferwiseToken():
         db.session.commit()
     
     return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect'
-    
+
 
 @app.route('/connect', methods=['GET'])
 def connect():
