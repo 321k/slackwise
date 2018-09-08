@@ -36,6 +36,8 @@ def create_app():
 
 app = create_app()
 
+Session(app)
+
 #Congiguring database
 if is_prod == 'True':
   POSTGRES = {
@@ -132,8 +134,9 @@ def oauth():
     global api_key
     print('Keys: ' + str(session.keys()))
     print('Values: ' + str(session.values()))
+    print('Session: ' + str(session))
 
-    if 'slack_id' in session.keys():
+    if 'slack_id' in session:
         slack_id = session['slack_id']
 
     else:
