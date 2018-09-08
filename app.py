@@ -130,7 +130,10 @@ def slack():
 
 @app.route('/oauth')
 def oauth():
-    print('Referrer' + str(request.referrer))
+
+    if request.referrer != 'https://transferwise.com/oauth/authorize?response_type=code&client_id=erik-edins-slack-bot&redirect_uri=https://slackwise.herokuapp.com/oauth':
+        return "Invalid request"
+
     global api_key
     print('Keys: ' + str(session.keys()))
     print('Values: ' + str(session.values()))
@@ -141,7 +144,7 @@ def oauth():
     print(request_session)
 
     if 'slack_id' in session:
-        slack_id = request_session['slack_id']
+        slack_id = session['slack_id']
     
     elif 'slack_id' in request_session:
         slack_id = request_session['slack_id']
