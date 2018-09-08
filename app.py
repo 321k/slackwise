@@ -233,6 +233,7 @@ def transferwiseToken():
     if user is None:
         user = User(slack_id = slack_id)
         db.session.add(user)
+        db.sesson.commit()
         return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect'
 
     token = user.transferwise_token
