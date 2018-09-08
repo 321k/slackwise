@@ -14,7 +14,7 @@ class BaseModel(db.Model):
         super().__init__(*args)
 
     def __repr__(self):
-        return json.dumps(self, self.__class__)
+        return self.__str__()
 
 class User(BaseModel):
     __tablename__ = 'users'
