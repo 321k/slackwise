@@ -135,8 +135,8 @@ def oauth():
     print('Values: ' + str(session.values()))
     print('Session: ' + str(session))
     print('Request cookie: ' + str(request.cookies['session']))
-    print('Request cookie: ' + str(request.cookies.session))
-
+    print(request.cookies.session)
+    print(base64.encodestring(request.cookies['session'].split(".")[0]))
     print(str(base64.encodestring(request.cookies['session'].split(".")[0])))
 
 
