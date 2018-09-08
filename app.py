@@ -153,19 +153,19 @@ def oauth():
         return 'No valid user. Please use the bot from within Slack.'
     
     code = request.args.get('code')
-    token = requests.post('https://api.transferwise.com/oauth/token',
+    response = requests.post('https://api.transferwise.com/oauth/token',
                           data = {'grant_type': 'authorization_code',
                                    'client_id':'erik-edins-slack-bot',
                                    'code': code,
                                    'redirect_uri':'https://slackwise.herokuapp.com/oauth'},
                           headers={'Authorization':'Basic ' + str(api_key)})
 
-    if token.status_code == 401:
+    if response.status_code == 401:
         print('Token exchange failed')
-        return json.loads(token.text)['error']
+        return json.loads(response.text)['error']
 
     else:
-    	token = json.loads(token.text)['access_token']
+    	token = json.loads(response.text)['access_token']
 
     if slack_id is None:
         return 'You need to use this bot via Slack for it to work.'
@@ -206,7 +206,6 @@ def oauth():
     db.session.commit()
 
     flash('You were successfully logged in')
-
 
     return render_template('index.html')
 
