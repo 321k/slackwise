@@ -1,168 +1,181 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-		<link rel="shortcut icon" type="image/x-icon" href="https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2018-07-25/405041027797_24cecaadbdc3a1b9a175_32.png"/>
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <link rel="shortcut icon" type="image/x-icon" href="https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2018-07-25/405041027797_24cecaadbdc3a1b9a175_32.png"/>
 
-		<meta charset="utf-8">
-	    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-
-		<title>TransferWise Slack bot</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 
-	</head>
-	<body>
-
-		<div class="container">
-		  <div class="row m-4">
-			<h1>SlackWise - The TransferWise Slack bot</h1>
-		  </div>
-		  <div class="row m-4">
-		  	<div class="col">
-		  		<p>The TransferWise Slack bot lets you manage your TransferWise account from Slack.</p>
-		  		<ul>
-					<li><a href="#install">Install</a></li>
-					<li><a href="#commands">Commands</a></li>
-					<li><a href="#examples">Examples</a></li>
-					<li><a href="/privacy">Privacy policy</a></li>
-				</ul>
-			</div>
-		  </div>
-		  <div class="row m-4">
-		  	<div class="col">
-		  		<h2 id="install">Install </h2>
-		  		<a href="https://slack.com/oauth/authorize?client_id=387079239778.387986429910&scope=chat:write:bot,chat:write:user,commands,bot,incoming-webhook"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>
-		  	</div>
-		  </div>
-		  <div class="row m-4">
-		    <div class="col-sm-3">
-		      <h3 id="commands">Command</h3>
-		    </div>
-		    <div class="col-sm">
-		      <h3>Description</h3>
-		    </div>
-		    <div class="col-sm-3">
-		    	<h3>Example</h3>
-		    </div>
-		  </div>
-		  <div class="row m-4">
-		    <div class="col-sm-3">
-		      /transferwise
-		    </div>
-		    <div class="col-sm">
-		      This is how you connect your TransferWise account.
-		    </div>
-		    <div class="col-sm-3">
-		    </div>
-		  </div>
-
-		  <div class="row m-4">
-		    <div class="col-sm-3">
-		      /latest
-		    </div>
-		    <div class="col-sm">
-		      Shows the lastest activity on your account
-		    </div>
-		    <div class="col-sm-3">
-		      
-		    </div>
-		  </div>
-
-		  <div class="row m-4">
-		    <div class="col-sm-3">
-		      /balances
-		    </div>
-		    <div class="col-sm">
-		      Shows your account balances
-		    </div>
-		    <div class="col-sm-3">
-		      
-		    </div>
-		  </div>
-
-		  <div class="row m-4">
-		    <div class="col-sm-3">
-		      /pay <span class="badge badge-primary">email</span> <span class="badge badge-primary">amount</span> <span class="badge badge-primary">currency</span>
-		    </div>
-		    <div class="col-sm">
-		      Creates a payment for 100 EUR. The command returns a link you can use to approve the payment.
-		    </div>
-		    <div class="col-sm-3">
-		    	/pay firstname.lastname@gmail.com 100 EUR
-		    </div>
-		  </div>
-
-		  <div class="row m-4">
-		    <div class="col-sm-3">
-		      /home-currency <span class="badge badge-primary">currency</span>
-		    </div>
-		    <div class="col-sm">
-		      Changes your home currency to any other allowed currency. By default, your home currency is the currency you have the most money in. Leave the currency blank to see your active home currency.
-		    </div>
-		    <div class="col-sm-3">
-		      /home-currency EUR
-		    </div>
-		  </div>
+        <title>TransferWise Slack bot</title>
 
 
-		  <div class="row m-4">
-		    <div class="col-sm-3">
-		      /switch-profile
-		    </div>
-		    <div class="col-sm">
-		      If you have a business profile, you can use this command to switch between your personal and business profile.
-		    </div>
-		    <div class="col-sm-3">
-		    </div>
-		  </div>
+    </head>
+    <body>
+
+        <div class="container">
+          <div class="row m-4">
+            <h1>SlackWise - The TransferWise Slack bot</h1>
+          </div>
+
+          <div class="row m-4">
+              {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                  <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+          </div>
+
+          <div class="row m-4">
+              <div class="col">
+                  <p>The TransferWise Slack bot lets you manage your TransferWise account from Slack.</p>
+                  <ul>
+                    <li><a href="#install">Install</a></li>
+                    <li><a href="#commands">Commands</a></li>
+                    <li><a href="#examples">Examples</a></li>
+                    <li><a href="/privacy">Privacy policy</a></li>
+                </ul>
+            </div>
+          </div>
+          <div class="row m-4">
+              <div class="col">
+                  <h2 id="install">Install </h2>
+                  <a href="https://slack.com/oauth/authorize?client_id=387079239778.387986429910&scope=chat:write:bot,chat:write:user,commands,bot,incoming-webhook"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>
+              </div>
+          </div>
+          <div class="row m-4">
+            <div class="col-sm-3">
+              <h3 id="commands">Command</h3>
+            </div>
+            <div class="col-sm">
+              <h3>Description</h3>
+            </div>
+            <div class="col-sm-3">
+                <h3>Example</h3>
+            </div>
+          </div>
+          <div class="row m-4">
+            <div class="col-sm-3">
+              /transferwise
+            </div>
+            <div class="col-sm">
+              This is how you connect your TransferWise account.
+            </div>
+            <div class="col-sm-3">
+            </div>
+          </div>
+
+          <div class="row m-4">
+            <div class="col-sm-3">
+              /latest
+            </div>
+            <div class="col-sm">
+              Shows the lastest activity on your account
+            </div>
+            <div class="col-sm-3">
+              
+            </div>
+          </div>
+
+          <div class="row m-4">
+            <div class="col-sm-3">
+              /balances
+            </div>
+            <div class="col-sm">
+              Shows your account balances
+            </div>
+            <div class="col-sm-3">
+              
+            </div>
+          </div>
+
+          <div class="row m-4">
+            <div class="col-sm-3">
+              /pay <span class="badge badge-primary">email</span> <span class="badge badge-primary">amount</span> <span class="badge badge-primary">currency</span>
+            </div>
+            <div class="col-sm">
+              Creates a payment for 100 EUR. The command returns a link you can use to approve the payment.
+            </div>
+            <div class="col-sm-3">
+                /pay firstname.lastname@gmail.com 100 EUR
+            </div>
+          </div>
+
+          <div class="row m-4">
+            <div class="col-sm-3">
+              /home-currency <span class="badge badge-primary">currency</span>
+            </div>
+            <div class="col-sm">
+              Changes your home currency to any other allowed currency. By default, your home currency is the currency you have the most money in. Leave the currency blank to see your active home currency.
+            </div>
+            <div class="col-sm-3">
+              /home-currency EUR
+            </div>
+          </div>
 
 
-		  <div class="row m-4">
-		    <div class="col-sm-3">
-		      /transferwise-bot-feedback <span class="badge badge-primary">feedback</span>
-		    </div>
-		    <div class="col-sm">
-		    	Send feedback about the bot
-		    </div>
-		    <div class="col-sm-3">
-		    	/transferwise-bot-feedback please add more features
-		    </div>
-		  </div>
-
-		  <div class="row m-4">
-		    <div class="col">
-		    	<h2 id="examples">Examples</h2>
-		    </div>
-		  </div>
-
-		  <div class="row m-4">
-		    <div class="col">
-		    	<h3>/latest</h3>
-		      <img width="400px" src="{{url_for('static', filename='latest.png')}}" />
-		    </div>
-		  </div>
-		  
-		  <div class="row m-4">
-		    <div class="col">
-		    	<h3>/balances</h3>
-		      <img width="400px" src="{{url_for('static', filename='balances.png')}}" />
-		    </div>
-		  </div>
-
-		</div>
-
-		 
-		 
+          <div class="row m-4">
+            <div class="col-sm-3">
+              /switch-profile
+            </div>
+            <div class="col-sm">
+              If you have a business profile, you can use this command to switch between your personal and business profile.
+            </div>
+            <div class="col-sm-3">
+            </div>
+          </div>
 
 
+          <div class="row m-4">
+            <div class="col-sm-3">
+              /transferwise-bot-feedback <span class="badge badge-primary">feedback</span>
+            </div>
+            <div class="col-sm">
+                Send feedback about the bot
+            </div>
+            <div class="col-sm-3">
+                /transferwise-bot-feedback please add more features
+            </div>
+          </div>
+
+          <div class="row m-4">
+            <div class="col">
+                <h2 id="examples">Examples</h2>
+            </div>
+          </div>
+
+          <div class="row m-4">
+            <div class="col">
+                <h3>/latest</h3>
+              <img width="400px" src="{{url_for('static', filename='latest.png')}}" />
+            </div>
+          </div>
+          
+          <div class="row m-4">
+            <div class="col">
+                <h3>/balances</h3>
+              <img width="400px" src="{{url_for('static', filename='balances.png')}}" />
+            </div>
+          </div>
+
+        </div>
+
+         
+         
 
 
 
 
-		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
-	</body>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+    </body>
 </html>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect, session
+from flask import Flask, render_template, url_for, request, redirect, session, flash
 
 import os
 import requests
@@ -130,10 +130,12 @@ def slack():
 
 @app.route('/oauth')
 def oauth():
+    print('Referrer' + str(request.referrer))
     global api_key
     print('Keys: ' + str(session.keys()))
     print('Values: ' + str(session.values()))
     print('Request cookie: ' + str(request.cookies['session']))
+
     
     request_session = json.loads(base64.b64decode(request.cookies['session'].split(".")[0]))
     print(request_session)
@@ -199,6 +201,9 @@ def oauth():
     user.transferwise_profile_id = profileId
     user.home_currency = sourceCurrency
     db.session.commit()
+
+    flash('You were successfully logged in')
+
 
     return render_template('index.html')
 
@@ -563,16 +568,6 @@ def feedback():
     text = request.form.get('text')
     print('Feedback: ' + str(text))
     return 'Thank you for your feedback'
-
-@app.route('/addkey', methods=['GET'])
-def addkey():
-    if is_prod == 'True':
-        return 'This endpoint is not available in production'
-
-    global api_key
-    api_key = request.args.get('key')
-    return 'Key added'
-
 
 
 if __name__ == '__main__':
