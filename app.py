@@ -214,7 +214,7 @@ def transferwiseToken():
     text  = request.form.get('text')
     slack_id = request.form.get('user_id')
     session['slack_id'] = slack_id
-    print('Slack ID ' + slack_id + ' added to session.')
+    print('Slack ID ' + session['slack_id'] + ' added to session.')
 
     if text == 'delete':
         print('Deleting user ' + str(slack_id))
@@ -533,5 +533,5 @@ def feedback():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True, port=port)
+    app.run(host='0.0.0.0', debug=False, port=port)
 
