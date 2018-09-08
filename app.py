@@ -29,7 +29,7 @@ else:
 
 def create_app():  
   app = Flask(__name__)
-  app.secret_key = os.urandom(24)
+  app.secret_key = 'asdf'
   app.config['DEBUG'] = True
   app.static_folder = 'static'
   return app
@@ -205,6 +205,14 @@ def oauth():
 
     return render_template('index.html')
 
+@app.route('/addcookie')
+def addcookie():
+    slack_id = request.args.get('slack_id')
+    print(slack_id)
+    session['slack_id'] = slack_id
+    
+    return render_template('index.html')
+
 @app.route('/transferwise', methods=['POST'])
 def transferwiseToken():
     if not verify_slack_request(request):
@@ -214,7 +222,7 @@ def transferwiseToken():
     slack_id = request.form.get('user_id')
     session['slack_id'] = slack_id
     session.permanent = True
-    
+
     print('Slack ID ' + session['slack_id'] + ' added to session.')
 
     if text == 'delete':
@@ -534,5 +542,5 @@ def feedback():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=False, port=port)
+    app.run(host='0.0.0.0', debug=True, port=port)
 
