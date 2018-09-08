@@ -22,9 +22,6 @@ slack_token = os.environ.get('SLACK_TOKEN', None)
 port = int(os.environ.get('PORT', 5000))
 api_key = os.environ.get('TRANSFERWISE_KEY', None)
 
-#Session settings
-session.permanent = True
-
 if is_prod == 'True':
   static_url = 'http://slackwise.herokuapp.com'
 else:
@@ -216,6 +213,8 @@ def transferwiseToken():
     text  = request.form.get('text')
     slack_id = request.form.get('user_id')
     session['slack_id'] = slack_id
+    session.permanent = True
+    
     print('Slack ID ' + session['slack_id'] + ' added to session.')
 
     if text == 'delete':
