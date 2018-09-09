@@ -8,6 +8,7 @@ import base64
 
 db = SQLAlchemy()
 
+
 class BaseModel(db.Model):
     """Base data model for all objects"""
     __abstract__ = True
@@ -29,15 +30,20 @@ class User(BaseModel):
     def __init__(self, slack_token = None, transferwise_token = None, slack_id = None, email = None, transferwise_profile_id = None, home_currency = None):
         self.slack_id = slack_id
         self.slack_token = slack_token
-        self.transferwise_token = base64.b64encode(encrypt(encryption_key, transferwise_token))
+        self.transferwise_token = base64.b64encode(encrypt(os.environ.get('ENCRYPTION_KEY', 'dev_key'), transferwise_token))
         self.email = email
         self.transferwise_profile_id = transferwise_profile_id
         self.home_currency = home_currency
 
     def __repr__(self):
+        if self.transferwise_token is None:
+            token = None
+        else:
+            token = str(decrypt(os.environ.get('ENCRYPTION_KEY', 'dev_key'), base64.b64decode(self.transferwise_token)))
+
         return json.dumps({'slack_id' : self.slack_id,
         'slack_token' : self.slack_token,
-        'transferwise_token' : str(decrypt(encryption_key, base64.b64decode(self.transferwise_token))),
+        'transferwise_token' : token,
         'email' : self.email,
         'transferwise_profile_id' : self.transferwise_profile_id,
         'home_currency' : self.home_currency})

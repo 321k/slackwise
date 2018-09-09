@@ -242,6 +242,7 @@ def transferwise():
             return 'TransferWise integration removed. Use /transferwise to reconnect.'
 
     user = User.query.filter_by(slack_id=slack_id).first()
+    print(str(user))
 
     if user is None:
         user = User(slack_id = slack_id)

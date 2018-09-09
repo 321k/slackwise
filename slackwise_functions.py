@@ -4,6 +4,7 @@ import urllib
 import hmac
 import hashlib
 import base64
+from simplecrypt import encrypt, decrypt
 
 def verify_slack_request(request):
     slack_signing_secret = os.environ.get('SLACK_SIGNING_SECRET', None)
@@ -93,6 +94,10 @@ def currency_to_flag(currency):
         currency = ''
     return currency
 
-def decrypt_transferwise_token(string):
+def decrypt_transferwise_token(token):
 	encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
-	return str(decrypt(encryption_key, base64.b64decode(self.transferwise_token)))
+	return str(decrypt(encryption_key, base64.b64decode(token)))
+
+
+
+
