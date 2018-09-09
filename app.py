@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect, session, flash
+from flask import Flask, render_template, url_for, request, redirect, session, flash, make_response
 
 import os
 import requests
@@ -227,7 +227,7 @@ def transferwise():
     text  = request.form.get('text')
     slack_id = request.form.get('user_id')
     print(app.secret_key)
-    
+
     session['slack_id'] = slack_id
 
     print('Slack ID ' + str(session['slack_id']) + ' added to session.')
@@ -243,7 +243,6 @@ def transferwise():
             return 'TransferWise integration removed. Use /transferwise to reconnect.'
 
     user = User.query.filter_by(slack_id=slack_id).first()
-    print(str(user))
 
     if user is None:
         user = User(slack_id = slack_id)
@@ -255,9 +254,11 @@ def transferwise():
         if profiles.status_code == 200:
             return 'TransferWise account connected'
 
+    resp = make_response('Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect')
+    resp.set_cookie('slack_id', slack_id)
+
     
-    
-    return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect'
+    return resp
 
 
 @app.route('/connect', methods=['GET'])
