@@ -10,6 +10,7 @@ from model import db, User
 import time
 from datetime import datetime, timedelta
 from slackwise_functions import verify_slack_request, currency_to_flag, decrypt_transferwise_token
+from flask_cors import CORS
 
 
 
@@ -38,6 +39,7 @@ def create_app():
   return app
 
 app = create_app()
+CORS(app)
 
 #Congiguring database
 if is_prod == 'True':
