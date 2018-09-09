@@ -28,9 +28,14 @@ class User(BaseModel):
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, slack_token = None, transferwise_token = None, slack_id = None, email = None, transferwise_profile_id = None, home_currency = None):
+        if transferwise_token is None:
+            token = None
+        else:
+            token = base64.b64encode(encrypt(os.environ.get('ENCRYPTION_KEY', 'dev_key'), transferwise_token))
+
         self.slack_id = slack_id
         self.slack_token = slack_token
-        self.transferwise_token = base64.b64encode(encrypt(os.environ.get('ENCRYPTION_KEY', 'dev_key'), transferwise_token))
+        self.transferwise_token = token
         self.email = email
         self.transferwise_profile_id = transferwise_profile_id
         self.home_currency = home_currency
