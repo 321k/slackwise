@@ -9,7 +9,7 @@ from transferwiseclient.transferwiseclient import getTransferWiseProfiles, creat
 from model import db, User
 import time
 from datetime import datetime, timedelta
-from slackwise_functions import verify_slack_request, currency_to_flag
+from slackwise_functions import verify_slack_request, currency_to_flag, decrypt_transferwise_token
 from simplecrypt import encrypt, decrypt
 
 
@@ -249,7 +249,7 @@ def transferwise():
         db.session.commit()
 
     if user.transferwise_token != None:
-        profiles = getTransferWiseProfiles(access_token = decrypt(encryption_key, user.transferwise_token))
+        profiles = getTransferWiseProfiles(access_token = decrypt_transferwise_token(user.transferwise_token))
         if profiles.status_code == 200:
             return 'TransferWise account connected'
 
@@ -279,7 +279,7 @@ def borderless():
     if user.transferwise_token is None:
         return 'Please add your TransferWise token first using /transferwise token'
 
-    borderless = getBorderlessAccountId(profileId = user.transferwise_profile_id, access_token = decrypt(encryption_key, user.transferwise_token))
+    borderless = getBorderlessAccountId(profileId = user.transferwise_profile_id, access_token = decrypt_transferwise_token(user.transferwise_token))
     
     if borderless.status_code != 200:
         return str(profiles.status_code)
@@ -287,7 +287,7 @@ def borderless():
     print("Borderless ID: " + str(json.loads(borderless.text)))
 
     borderlessId = json.loads(borderless.text)[0]['id']
-    accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = decrypt(encryption_key, user.transferwise_token))
+    accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = decrypt_transferwise_token(user.transferwise_token))
 
     if accounts.status_code != 200:
         return str(profiles.status_code)
@@ -363,7 +363,7 @@ def pay():
     name = first_name + ' ' + last_name
     print('Name: ' + name)
 
-    recipient = createTransferWiseRecipient(email = recipient_email, currency = currency, name = name, legalType='PRIVATE', profileId = profileId, access_token = decrypt(encryption_key, user.transferwise_token))
+    recipient = createTransferWiseRecipient(email = recipient_email, currency = currency, name = name, legalType='PRIVATE', profileId = profileId, access_token = decrypt_transferwise_token(user.transferwise_token))
     print(recipient)
 
     if recipient.status_code == 401:
@@ -380,13 +380,13 @@ def pay():
     else:
         sourceCurrency = user.home_currency
 
-    quote = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, access_token = decrypt(encryption_key, user.transferwise_token), targetAmount = amount)
+    quote = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, access_token = decrypt_transferwise_token(user.transferwise_token), targetAmount = amount)
     print(quote.status_code)
 
     if quote.status_code == 422:
         print("Unsupported currency, defaulting to GBP")
         sourceCurrency = 'GBP'
-        quote = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, access_token = decrypt(encryption_key, user.transferwise_token), targetAmount = amount)
+        quote = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, access_token = decrypt_transferwise_token(user.transferwise_token), targetAmount = amount)
 
     if quote.status_code == 401:
         return str(quote.error_message)
@@ -398,7 +398,7 @@ def pay():
 
 
     recipientId = json.loads(recipient.text)['id']
-    transfer = createPayment(recipientId = recipientId, quoteId = quoteId, reference = 'Slackwise', access_token = decrypt(encryption_key, user.transferwise_token))
+    transfer = createPayment(recipientId = recipientId, quoteId = quoteId, reference = 'Slackwise', access_token = decrypt_transferwise_token(user.transferwise_token))
     if transfer.status_code == 401:
         return str(json.loads(transfer.text))
 
@@ -468,7 +468,7 @@ def lastest():
     startDate = datetime.today() - timedelta(days=1)
     endDate = datetime.today()
 
-    borderlessId = getBorderlessAccountId(user.transferwise_profile_id, decrypt(encryption_key, user.transferwise_token))
+    borderlessId = getBorderlessAccountId(user.transferwise_profile_id, decrypt_transferwise_token(user.transferwise_token))
 
     if len(json.loads(borderlessId.text)) < 1:
         return 'You need to have a borderless account to use the Slack bot'
@@ -478,7 +478,7 @@ def lastest():
 
     borderlessAccountId = json.loads(borderlessId.text)[0]['id']
 
-    activity = getBorderlessActivity(borderlessAccountId, decrypt(encryption_key, user.transferwise_token))
+    activity = getBorderlessActivity(borderlessAccountId, decrypt_transferwise_token(user.transferwise_token))
     activity = json.loads(activity.text)
 
     text="Your latest borderless activity: \n"
@@ -518,7 +518,7 @@ def profile():
     slack_id = request.form.get('user_id')
     user = User.query.filter_by(slack_id = slack_id).first()
     print('Previous TransferWise profile: ' + str(user.transferwise_profile_id))
-    profiles = getTransferWiseProfiles(access_token = decrypt(encryption_key, user.transferwise_token))
+    profiles = getTransferWiseProfiles(access_token = decrypt_transferwise_token(user.transferwise_token))
 
     if profiles.status_code != 200:
         print(str(profiles.status_code))

@@ -92,3 +92,7 @@ def currency_to_flag(currency):
     else:
         currency = ''
     return currency
+
+def decrypt_transferwise_token(string):
+	encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
+	return str(decrypt(encryption_key, base64.b64decode(self.transferwise_token)))
