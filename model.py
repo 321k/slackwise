@@ -2,9 +2,11 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import json
+from simplecrypt import encrypt, decrypt
+import os
 
 db = SQLAlchemy()
-
+encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
 
 class BaseModel(db.Model):
     """Base data model for all objects"""
@@ -27,7 +29,7 @@ class User(BaseModel):
     def __init__(self, slack_token = None, transferwise_token = None, slack_id = None, email = None, transferwise_profile_id = None, home_currency = None):
         self.slack_id = slack_id
         self.slack_token = slack_token
-        self.transferwise_token = transferwise_token
+        self.transferwise_token = encrypt(encryption_key, transferwise_token)
         self.email = email
         self.transferwise_profile_id = transferwise_profile_id
         self.home_currency = home_currency
@@ -35,10 +37,7 @@ class User(BaseModel):
     def __repr__(self):
         return json.dumps({'slack_id' : self.slack_id,
         'slack_token' : self.slack_token,
-        'transferwise_token' : self.transferwise_token,
+        'transferwise_token' : str(decrypt(encryption_key, self.transferwise_token)),
         'email' : self.email,
         'transferwise_profile_id' : self.transferwise_profile_id,
         'home_currency' : self.home_currency})
-
-x = User()
-print(x.slack_id == None)
