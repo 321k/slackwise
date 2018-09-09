@@ -15,20 +15,24 @@
     <body>
 
         <div class="container">
-          <div class="row m-4">
-            <h1>SlackWise - The TransferWise Slack bot</h1>
-          </div>
-
-          <div class="row m-4">
-              {% with messages = get_flashed_messages() %}
-              {% if messages %}
-                <div class="alert alert-primary flashes" role="alert">
-                {% for message in messages %}
-                  {{ message }}
-                {% endfor %}
+            <div class="row m-4">
+                <div class="col">
+                    <h1>SlackWise - The TransferWise Slack bot</h1>
                 </div>
-              {% endif %}
-            {% endwith %}
+            </div>
+
+            <div class="row m-4">
+                <div class="col">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="alert alert-primary flashes" role="alert">
+                                {% for message in messages %}
+                                    {{ message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
           </div>
 
           <div class="row m-4">
@@ -49,14 +53,8 @@
               </div>
           </div>
           <div class="row m-4">
-            <div class="col-sm-3">
-              <h3 id="commands">Command</h3>
-            </div>
-            <div class="col-sm">
-              <h3>Description</h3>
-            </div>
-            <div class="col-sm-3">
-                <h3>Example</h3>
+            <div class="col">
+              <h3 id="commands">Commands</h3>
             </div>
           </div>
           <div class="row m-4">
