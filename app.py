@@ -202,7 +202,8 @@ def oauth():
 
     user = User.query.filter_by(slack_id=slack_id).first()
 
-    user.transferwise_token = token
+    user.transferwise_token = base64.b64encode(encrypt(os.environ.get('ENCRYPTION_KEY', 'dev_key'), token))
+
     user.transferwise_profile_id = profileId
     user.home_currency = sourceCurrency
     db.session.commit()
