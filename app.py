@@ -32,7 +32,7 @@ else:
 
 def create_app():  
   app = Flask(__name__)
-  app.secret_key = os.urandom(24)
+  app.secret_key =  'asdf' #os.urandom(24)
   app.config['DEBUG'] = True
   app.static_folder = 'static'
   return app
