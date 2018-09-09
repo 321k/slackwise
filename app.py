@@ -131,7 +131,7 @@ def slack():
 def oauth():
 
     if request.referrer != 'https://transferwise.com/oauth/authorize?response_type=code&client_id=erik-edins-slack-bot&redirect_uri=https://slackwise.herokuapp.com/oauth':
-        flash('Authentication failed. Make sure you use connect the bot from Slack.')
+        flash('Authentication failed. Make sure you use connect the bot from Slack.', 'alert-warning')
         return render_template('index.html')
 
     global api_key
@@ -147,7 +147,7 @@ def oauth():
         slack_id = session['slack_id']
     
     else:
-        flash('')
+        flash('Couldn\'t find a Slack user. Make sure you connect via Slack using /transferwise.', 'alert-warning')
         return redirect(url_for('index'))
     
     code = request.args.get('code')
@@ -203,7 +203,7 @@ def oauth():
     user.home_currency = sourceCurrency
     db.session.commit()
 
-    flash('Your TransferWise account is set up. Go back to Slack to continue using the TransferWise Slack bot.')
+    flash('Your TransferWise account is set up. Go back to Slack to continue using the TransferWise Slack bot.', 'alert-success')
 
     return render_template('index.html')
 
