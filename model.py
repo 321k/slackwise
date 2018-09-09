@@ -40,3 +40,5 @@ class User(BaseModel):
         'transferwise_profile_id' : self.transferwise_profile_id,
         'home_currency' : self.home_currency})
 
+x = User()
+print(x.slack_id == None)

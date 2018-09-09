@@ -214,7 +214,7 @@ def addcookie():
     return render_template('index.html')
 
 @app.route('/transferwise', methods=['POST'])
-def transferwiseToken():
+def transferwise():
     if not verify_slack_request(request):
         return 'Request verification failed'
 
@@ -223,7 +223,7 @@ def transferwiseToken():
     session['slack_id'] = slack_id
     session.permanent = True
 
-    print('Slack ID ' + session['slack_id'] + ' added to session.')
+    print('Slack ID ' + str(session['slack_id']) + ' added to session.')
 
     if text == 'delete':
         print('Deleting user ' + str(slack_id))
@@ -237,15 +237,17 @@ def transferwiseToken():
 
     user = User.query.filter_by(slack_id=slack_id).first()
 
-    if user.transferwise_token is not None:
-        profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
-        if profiles.status_code == 200:
-            return 'TransferWise account connected'
-
     if user is None:
         user = User(slack_id = slack_id)
         db.session.add(user)
         db.session.commit()
+
+    if user.transferwise_token != None:
+        profiles = getTransferWiseProfiles(access_token = user.transferwise_token)
+        if profiles.status_code == 200:
+            return 'TransferWise account connected'
+
+    
     
     return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect'
 
