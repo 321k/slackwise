@@ -32,7 +32,7 @@ else:
 
 def create_app():  
   app = Flask(__name__)
-  app.secret_key =  'asdf' #os.urandom(24)
+  app.secret_key =  encryption_key
   app.config['DEBUG'] = True
   app.static_folder = 'static'
   return app
@@ -215,10 +215,9 @@ def oauth():
 @app.route('/addcookie')
 def addcookie():
     slack_id = request.args.get('slack_id')
-    print(slack_id)
     session['slack_id'] = slack_id
     
-    return render_template('index.html')
+    return 'Added cookie'
 
 @app.route('/transferwise', methods=['POST'])
 def transferwise():
@@ -227,8 +226,9 @@ def transferwise():
 
     text  = request.form.get('text')
     slack_id = request.form.get('user_id')
+    print(app.secret_key)
+    
     session['slack_id'] = slack_id
-    session.permanent = True
 
     print('Slack ID ' + str(session['slack_id']) + ' added to session.')
 
