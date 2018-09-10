@@ -256,15 +256,13 @@ def transferwise():
         if profiles.status_code == 200:
             return 'TransferWise account connected'
 
-    resp = make_response('Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect')
-    resp.set_cookie('slack_id', slack_id)
-
-    
-    return resp
+    return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect?slack_id='+slack_id
 
 
 @app.route('/connect', methods=['GET'])
 def connect():
+    slack_id = request.args.get('slack_id')
+    session['slack_id'] = slack_id
     return redirect('https://api.transferwise.com/oauth/authorize?response_type=code&client_id=erik-edins-slack-bot&redirect_uri=https://slackwise.herokuapp.com/oauth')
 
 @app.route('/balances', methods=['POST'])
