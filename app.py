@@ -11,7 +11,7 @@ import time
 from datetime import datetime, timedelta
 from slackwise_functions import verify_slack_request, currency_to_flag, decrypt_transferwise_token
 from flask_cors import CORS
-
+from simplecrypt import encrypt, decrypt
 
 
 #Declare global variables
