@@ -6,6 +6,7 @@ import hashlib
 import base64
 from simplecrypt import encrypt, decrypt
 
+
 def verify_slack_request(request):
     slack_signing_secret = os.environ.get('SLACK_SIGNING_SECRET', None)
     is_prod = os.environ.get('IS_HEROKU', None)
@@ -25,7 +26,12 @@ def verify_slack_request(request):
     message = message.encode('utf-8')
 
     slack_signing_secret = bytes(slack_signing_secret, 'utf-8')
-    my_signature = 'v0=' + hmac.new(slack_signing_secret, msg=message, digestmod=hashlib.sha256).hexdigest()
+    my_signature = 'v0=' + \
+        hmac.new(
+            slack_signing_secret,
+            msg=message,
+            digestmod=hashlib.sha256
+        ).hexdigest()
 
     slack_signature = request.headers['X-Slack-Signature']
 
@@ -33,7 +39,8 @@ def verify_slack_request(request):
         print("Verification succeeded.")
         return True
     elif is_prod is None:
-        print("Verification failed, but continuing anyway since this is test environment.")
+        print("Verification failed, \
+            but continuing anyway since this is test environment.")
         return True
     else:
         print("Verification failed")
@@ -94,10 +101,12 @@ def currency_to_flag(currency):
         currency = ''
     return currency
 
+
 def decrypt_transferwise_token(token):
-	encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
-	return str(decrypt(encryption_key, base64.b64decode(token)))
+    encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
+    return str(decrypt(encryption_key, base64.b64decode(token)))
 
 
-
-
+def encrypt_transferwise_token(token):
+    encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
+    return str(base64.b64encode(encrypt(encryption_key, token)))

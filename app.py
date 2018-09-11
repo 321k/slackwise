@@ -151,9 +151,11 @@ def oauth():
     if request.referrer != 'https://transferwise.com/oauth/authorize?response_type=code& \
     client_id=erik-edins-slack-bot& \
     redirect_uri=https://slackwise.herokuapp.com/oauth':
+
         message = 'Authentication failed. \
         Make sure you use connect the bot from Slack.'
         flash(message, 'alert-warning')
+
         return render_template('index.html')
 
     global api_key
@@ -255,11 +257,8 @@ def oauth():
 
     user = User.query.filter_by(slack_id=slack_id).first()
 
-    user.transferwise_token = base64.b64encode(
-        encrypt(
-            os.environ.get('ENCRYPTION_KEY', 'dev_key'), token
-        )
-    )
+    user.transferwise_token = token
+    user.addEncryptedToken(token)
 
     user.transferwise_profile_id = profileId
     user.home_currency = sourceCurrency
