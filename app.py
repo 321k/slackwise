@@ -148,7 +148,7 @@ def slack():
 
 @app.route('/oauth', methods=['GET'])
 def oauth():
-    referrer_url = 'https://api.transferwise.com/' + \
+    referrer_url = 'https://transferwise.com/' + \
         'oauth/authorize?response_type=code' + \
         '&client_id=erik-edins-slack-bot&' + \
         'redirect_uri=https://slackwise.herokuapp.com/oauth'
