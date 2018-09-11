@@ -327,9 +327,11 @@ def transferwise():
 def connect():
     slack_id = request.args.get('slack_id')
     session['slack_id'] = slack_id
-    return redirect('https://api.transferwise.com/oauth/authorize?response_type=code\
-        &client_id=erik-edins-slack-bot&\
-        redirect_uri=https://slackwise.herokuapp.com/oauth')
+    redirect_url = 'https://api.transferwise.com/' + \
+        'oauth/authorize?response_type=code' + \
+        '&client_id=erik-edins-slack-bot&' + \
+        'redirect_uri=https://slackwise.herokuapp.com/oauth'
+    return redirect(redirect_url)
 
 
 @app.route('/balances', methods=['POST'])
