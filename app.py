@@ -1,25 +1,27 @@
-from flask import Flask, render_template, url_for, request, redirect, session, flash, make_response
 
+from simplecrypt import encrypt, decrypt
+from model import db, User
+from datetime import datetime, timedelta
+import time
 import os
 import requests
 import json
 import base64
-from slackclient import SlackClient
-from transferwiseclient.transferwiseclient import getTransferWiseProfiles, createTransferWiseRecipient, createTransferWiseQuote, createPayment, getBorderlessAccountId, getBorderlessAccounts, getTransfers, getBorderlessActivity
-from model import db, User
-import time
-from datetime import datetime, timedelta
-from slackwise_functions import verify_slack_request, currency_to_flag, decrypt_transferwise_token
-from flask_cors import CORS
-from simplecrypt import encrypt, decrypt
+from flask import Flask, \
+    render_template, url_for, request, redirect, session, flash, make_response
+from slackwise_functions import verify_slack_request, \
+    currency_to_flag, decrypt_transferwise_token
+from transferwiseclient.transferwiseclient import getTransferWiseProfiles, \
+    createTransferWiseRecipient, createTransferWiseQuote, createPayment, \
+    getBorderlessAccountId, getBorderlessAccounts, getBorderlessActivity
 
 
-#Declare global variables
+# Declare global variables
 global slack_token
 global transferwise_token
 global api_key
 
-#Environment variables
+# Environment variables
 is_prod = os.environ.get('IS_HEROKU', None)
 slack_token = os.environ.get('SLACK_TOKEN', None)
 port = int(os.environ.get('PORT', 5000))
@@ -27,39 +29,41 @@ api_key = os.environ.get('TRANSFERWISE_KEY', None)
 encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
 
 if is_prod == 'True':
-  static_url = 'http://slackwise.herokuapp.com'
+    static_url = 'http://slackwise.herokuapp.com'
 else:
-  static_url = 'localhost:5000'
+    static_url = 'localhost:5000'
 
-def create_app():  
-  app = Flask(__name__)
-  app.secret_key =  encryption_key
-  app.config['DEBUG'] = True
-  app.static_folder = 'static'
-  return app
+
+def create_app():
+    app = Flask(__name__)
+    app.secret_key = encryption_key
+    app.config['DEBUG'] = True
+    app.static_folder = 'static'
+    return app
+
 
 app = create_app()
-CORS(app)
 
-#Congiguring database
+
+# Congiguring database
 if is_prod == 'True':
-  POSTGRES = {
-      'user': 'pkarwhotjkxyjt',
-      'pw': os.environ.get('PG_PASSWORD', None),
-      'db': 'd2ta6fjdj5k607',
-      'host': 'ec2-54-235-196-250.compute-1.amazonaws.com',
-      'port': '5432',
-  }
-  static_url = 'http://slackwise.herokuapp.com'
+    POSTGRES = {
+        'user': 'pkarwhotjkxyjt',
+        'pw': os.environ.get('PG_PASSWORD', None),
+        'db': 'd2ta6fjdj5k607',
+        'host': 'ec2-54-235-196-250.compute-1.amazonaws.com',
+        'port': '5432',
+    }
+    static_url = 'http://slackwise.herokuapp.com'
 else:
-  POSTGRES = {
-      'user': 'erik.johansson',
-      'pw': '',
-      'db': 'slackwise',
-      'host': 'localhost',
-      'port': '5433',
-  }
-  static_url = 'localhost:5000'
+    POSTGRES = {
+        'user': 'erik.johansson',
+        'pw': '',
+        'db': 'slackwise',
+        'host': 'localhost',
+        'port': '5433',
+    }
+    static_url = 'localhost:5000'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
 %(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
@@ -67,31 +71,38 @@ db.init_app(app)
 
 port = int(os.environ.get('PORT', 5000))
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/privacy')
 def privacy():
     return render_template('privacy-policy.html')
 
+
 @app.route('/slack')
 def slack():
     if is_prod == 'True':
         code = request.args.get('code')
-        payload = {'client_id': '387079239778.387986429910', 
-        'client_secret': '12df7e70460efc4c8c6e8a1cea961612',
-        'scope':'users.profile:read+identity.basic',
-        'code': code}
+        payload = {'client_id': '387079239778.387986429910',
+                   'client_secret': '12df7e70460efc4c8c6e8a1cea961612',
+                   'scope': 'users.profile:read+identity.basic',
+                   'code': code}
         response = requests.get('https://slack.com/api/oauth.access',
-            params = payload,
-            headers={
-                     'Content-Type': 'application/x-www-form-urlencoded'})
+                                params=payload,
+                                headers={
+                                    'Content-Type':
+                                    'application/x-www-form-urlencoded'})
         oauth = json.loads(response.text)
         print(str(oauth['ok']))
 
     else:
-        oauth = {'access_token': 'xoxp-XXXXXXXX-XXXXXXXX-XXXXX','scope': 'users.profile:read', 'team_name': 'TransferWise', 'team_id': 'TXXXXXXXXX' }
+        oauth = {'access_token': 'xoxp-XXXXXXXX-XXXXXXXX-XXXXX',
+                 'scope': 'users.profile:read',
+                 'team_name': 'TransferWise',
+                 'team_id': 'TXXXXXXXXX'}
 
     if 'error' in oauth:
         print('Failed to authenticate to Slack')
@@ -102,16 +113,17 @@ def slack():
 
     payload = {'token': token}
     response = requests.get('https://slack.com/api/users.identity',
-        params = payload,
-        headers={
-                 'Content-Type': 'application/x-www-form-urlencoded'})
+                            params=payload,
+                            headers={
+                                'Content-Type':
+                                'application/x-www-form-urlencoded'})
     userIdentity = json.loads(response.text)
     print('Success: ' + str(userIdentity['ok']))
-    
-    if userIdentity['ok'] == True:
+
+    if userIdentity['ok'] is True:
         user = User.query.filter_by(slack_token=token).first()
         if user is None:
-            user = User(slack_token = token, slack_id = userIdentity['user']['id'])
+            user = User(slack_token=token, slack_id=userIdentity['user']['id'])
             db.session.add(user)
             db.session.commit()
 
@@ -122,65 +134,78 @@ def slack():
         if user.email is None:
             payload = {'token': token, 'user': user.slack_id}
             response = requests.get('https://slack.com/api/users.profile.get',
-                params = payload,
-                headers={
-                'Content-Type': 'application/x-www-form-urlencoded'})
+                                    params=payload,
+                                    headers={
+                                        'Content-Type':
+                                        'application/x-www-form-urlencoded'})
             userProfile = json.loads(response.text)
-            if userProfile['ok']==True:
+            if userProfile['ok'] is True:
                 user.email = userProfile['profile']['email']
                 db.session.commit()
 
     return redirect(url_for('index'))
 
+
 @app.route('/oauth', methods=['GET'])
 def oauth():
-
-    if request.referrer != 'https://transferwise.com/oauth/authorize?response_type=code&client_id=erik-edins-slack-bot&redirect_uri=https://slackwise.herokuapp.com/oauth':
-        flash('Authentication failed. Make sure you use connect the bot from Slack.', 'alert-warning')
+    if request.referrer != 'https://transferwise.com/oauth/authorize?response_type=code& \
+    client_id=erik-edins-slack-bot& \
+    redirect_uri=https://slackwise.herokuapp.com/oauth':
+        message = 'Authentication failed. \
+        Make sure you use connect the bot from Slack.'
+        flash(message, 'alert-warning')
         return render_template('index.html')
 
     global api_key
 
-    if 'session' in request.cookies:
-        request_session = json.loads(base64.b64decode(request.cookies['session'].split(".")[0]))
+    if 'slack_id' in session:
+        slack_id = session['slack_id']
+
+    elif 'session' in request.cookies:
+        request_session = json.loads(
+            base64.b64decode(request.cookies['session'].split(".")[0])
+        )
         print(request_session)
 
         if 'slack_id' in request_session:
             slack_id = request_session['slack_id']
 
-    elif 'slack_id' in session:
-        slack_id = session['slack_id']
-    
     else:
-        flash('Couldn\'t find a Slack user. Make sure you connect via Slack using /transferwise.', 'alert-warning')
+        message = 'Couldn\'t find a Slack user. \
+        Make sure you connect via Slack using /transferwise.'
+        flash(message, 'alert-warning')
         return redirect(url_for('index'))
-    
+
     code = request.args.get('code')
     response = requests.post('https://api.transferwise.com/oauth/token',
-                          data = {'grant_type': 'authorization_code',
-                                   'client_id':'erik-edins-slack-bot',
+                             data={'grant_type': 'authorization_code',
+                                   'client_id': 'erik-edins-slack-bot',
                                    'code': code,
-                                   'redirect_uri':'https://slackwise.herokuapp.com/oauth'},
-                          headers={'Authorization':'Basic ' + str(api_key)})
+                                   'redirect_uri':
+                                   'https://slackwise.herokuapp.com/oauth'},
+                             headers={'Authorization': 'Basic ' +
+                                      str(api_key)})
 
     if response.status_code == 401:
         print('Token exchange failed')
         return json.loads(response.text)['error']
 
     else:
-    	token = json.loads(response.text)['access_token']
+        token = json.loads(response.text)['access_token']
 
     if slack_id is None:
         return 'You need to use this bot via Slack for it to work.'
 
-    profiles = getTransferWiseProfiles(access_token = token)
+    profiles = getTransferWiseProfiles(access_token=token)
 
     if profiles.status_code == 401:
         return str(json.loads(profiles.text))
 
     profileId = json.loads(profiles.text)[0]['id']
 
-    borderlessId = getBorderlessAccountId(profileId = profileId, access_token = token)
+    borderlessId = getBorderlessAccountId(
+        profileId=profileId,
+        access_token=token)
 
     if borderlessId.status_code == 401:
         return str(borderlessId.error_message)
@@ -190,43 +215,78 @@ def oauth():
 
     borderlessId = json.loads(borderlessId.text)[0]['id']
 
-    accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = token)
-    
+    accounts = getBorderlessAccounts(
+        borderlessId=borderlessId,
+        access_token=token)
+
     if accounts.status_code == 200:
         accounts = json.loads(accounts.text)
 
         # The first record has the highest balance, so we'll default to that
         sourceCurrency = accounts['balances'][0]['amount']['currency']
 
-    if sourceCurrency not in ['USD','AUD','BGN','BRL','CAD','CHF','CZK','DKK','EUR','GBP','HKD','HRK','HUF','JPY','NOK','NZD','PLN','RON','SEK','SGD','TRY']:
+    currencies = [
+        'USD',
+        'AUD',
+        'BGN',
+        'BRL',
+        'CAD',
+        'CHF',
+        'CZK',
+        'DKK',
+        'EUR',
+        'GBP',
+        'HKD',
+        'HRK',
+        'HUF',
+        'JPY',
+        'NOK',
+        'NZD',
+        'PLN',
+        'RON',
+        'SEK',
+        'SGD',
+        'TRY'
+    ]
+
+    if sourceCurrency not in currencies:
         print("Source currency not valid, assuming GBP")
         sourceCurrency = 'GBP'
 
     user = User.query.filter_by(slack_id=slack_id).first()
 
-    user.transferwise_token = base64.b64encode(encrypt(os.environ.get('ENCRYPTION_KEY', 'dev_key'), token))
+    user.transferwise_token = base64.b64encode(
+        encrypt(
+            os.environ.get('ENCRYPTION_KEY', 'dev_key'), token
+        )
+    )
 
     user.transferwise_profile_id = profileId
     user.home_currency = sourceCurrency
     db.session.commit()
 
-    flash('Your TransferWise account is set up. Go back to Slack to continue using the TransferWise Slack bot.', 'alert-success')
+    flash(
+        'Your TransferWise account is set up. \
+        Go back to Slack to continue using the TransferWise Slack bot.',
+        'alert-success'
+    )
 
     return render_template('index.html')
+
 
 @app.route('/addcookie')
 def addcookie():
     slack_id = request.args.get('slack_id')
     session['slack_id'] = slack_id
-    
     return 'Added cookie'
+
 
 @app.route('/transferwise', methods=['POST'])
 def transferwise():
     if not verify_slack_request(request):
         return 'Request verification failed'
 
-    text  = request.form.get('text')
+    text = request.form.get('text')
     slack_id = request.form.get('user_id')
     print(app.secret_key)
 
@@ -236,75 +296,88 @@ def transferwise():
 
     if text == 'delete':
         print('Deleting user ' + str(slack_id))
-        user = User.query.filter_by(slack_id = slack_id).first()
+        user = User.query.filter_by(slack_id=slack_id).first()
         if user is None:
-            return 'TransferWise integration removed. Use /transferwise to reconnect.'
+            return 'TransferWise integration removed. \
+            Use /transferwise to reconnect.'
         else:
             db.session.delete(user)
             db.session.commit()
-            return 'TransferWise integration removed. Use /transferwise to reconnect.'
+            return 'TransferWise integration removed. \
+            Use /transferwise to reconnect.'
 
     user = User.query.filter_by(slack_id=slack_id).first()
 
     if user is None:
-        user = User(slack_id = slack_id)
+        user = User(slack_id=slack_id)
         db.session.add(user)
         db.session.commit()
 
-    if user.transferwise_token != None:
-        profiles = getTransferWiseProfiles(access_token = decrypt_transferwise_token(user.transferwise_token))
+    if user.transferwise_token is not None:
+        profiles = getTransferWiseProfiles(
+            access_token=decrypt_transferwise_token(user.transferwise_token)
+        )
         if profiles.status_code == 200:
             return 'TransferWise account connected'
 
-    return 'Click here to connect your TransferWise account https://slackwise.herokuapp.com/connect?slack_id='+slack_id
+    return 'Click here to connect your TransferWise account \
+    https://slackwise.herokuapp.com/connect?slack_id=' + slack_id
 
 
 @app.route('/connect', methods=['GET'])
 def connect():
     slack_id = request.args.get('slack_id')
     session['slack_id'] = slack_id
-    return redirect('https://api.transferwise.com/oauth/authorize?response_type=code&client_id=erik-edins-slack-bot&redirect_uri=https://slackwise.herokuapp.com/oauth')
+    return redirect('https://api.transferwise.com/oauth/authorize?response_type=code\
+        &client_id=erik-edins-slack-bot&\
+        redirect_uri=https://slackwise.herokuapp.com/oauth')
+
 
 @app.route('/balances', methods=['POST'])
 def borderless():
     if not verify_slack_request(request):
         return 'Request verification failed'
 
-
     slack_id = request.form.get('user_id')
-    
     user = User.query.filter_by(slack_id=slack_id).first()
 
     if user is None:
-        user = User(slack_id = slack_id)
+        user = User(slack_id=slack_id)
         db.session.add(user)
 
     if user.transferwise_token is None:
-        return 'Please add your TransferWise token first using /transferwise token'
+        return 'Please add your TransferWise token first using \
+        /transferwise token'
 
-    borderless = getBorderlessAccountId(profileId = user.transferwise_profile_id, access_token = decrypt_transferwise_token(user.transferwise_token))
-    
+    borderless = getBorderlessAccountId(
+        profileId=user.transferwise_profile_id,
+        access_token=decrypt_transferwise_token(user.transferwise_token)
+    )
+
     if borderless.status_code != 200:
-        return str(profiles.status_code)
+        return str(borderless.status_code)
 
     print("Borderless ID: " + str(json.loads(borderless.text)))
 
     borderlessId = json.loads(borderless.text)[0]['id']
-    accounts = getBorderlessAccounts(borderlessId = borderlessId, access_token = decrypt_transferwise_token(user.transferwise_token))
+    accounts = getBorderlessAccounts(
+        borderlessId=borderlessId,
+        access_token=decrypt_transferwise_token(user.transferwise_token)
+    )
 
     if accounts.status_code != 200:
-        return str(profiles.status_code)
+        return str(accounts.status_code)
 
     accounts = json.loads(accounts.text)
-    text="Your balances are \n"
+    text = "Your balances are \n"
     for b in accounts['balances']:
-
         currency = str(b['amount']['currency'])
         currency = currency_to_flag(currency)
-
-        text+=currency + " " + str(b['amount']['value']) + " " + str(b['amount']['currency']) + "\n"
+        text += currency + " " + str(b['amount']['value']) + \
+            " " + str(b['amount']['currency']) + "\n"
 
     return text
+
 
 @app.route('/pay', methods=['POST'])
 def pay():
@@ -312,8 +385,7 @@ def pay():
     if not verify_slack_request(request):
         return 'Request verification failed'
 
-
-    text  = request.form.get('text')
+    text = request.form.get('text')
     print(text)
     text = text.split(' ')
 
@@ -322,23 +394,23 @@ def pay():
     user = User.query.filter_by(slack_id=slack_id).first()
 
     if user is None or user.transferwise_token is None:
-        return 'Please connect your TransferWise account using /transerwise token'
+        return 'Please connect your TransferWise \
+        account using /transerwise token'
 
     profileId = user.transferwise_profile_id
 
     if profileId is None:
-        return 'Please connect your TransferWise account using /transerwise token'
-    
+        return 'Please connect your TransferWise \
+        account using /transerwise token'
+
     if len(text) < 3:
         return 'Please use the format /pay email amount currency'
 
     if len(text[0].split('@')) < 2:
         return 'Please include a valid email'
-    
-    
+
     recipient_email = text[0]
     recipient_email = recipient_email.split('|')[1].replace(">", "")
-    
     print('Recipient email: ' + str(recipient_email))
 
     amount = text[1]
@@ -351,22 +423,30 @@ def pay():
 
     first_name = name[0]
     first_name = ''.join([i for i in first_name if not i.isdigit()])
-    
+
     if len(name) < 2:
         last_name = 'Unknown'
 
     else:
-        last_name = name[len(name)-1]
+        last_name = name[len(name) - 1]
         last_name = ''.join([i for i in last_name if not i.isdigit()])
 
-
-    if len(last_name)<3:
+    if len(last_name) < 3:
         last_name = 'Unknown'
 
     name = first_name + ' ' + last_name
     print('Name: ' + name)
 
-    recipient = createTransferWiseRecipient(email = recipient_email, currency = currency, name = name, legalType='PRIVATE', profileId = profileId, access_token = decrypt_transferwise_token(user.transferwise_token))
+    recipient = createTransferWiseRecipient(
+        email=recipient_email,
+        currency=currency,
+        name=name,
+        legalType='PRIVATE',
+        profileId=profileId,
+        access_token=decrypt_transferwise_token(
+            user.transferwise_token
+        )
+    )
     print(recipient)
 
     if recipient.status_code == 401:
@@ -383,13 +463,29 @@ def pay():
     else:
         sourceCurrency = user.home_currency
 
-    quote = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, access_token = decrypt_transferwise_token(user.transferwise_token), targetAmount = amount)
+    quote = createTransferWiseQuote(
+        profileId=profileId,
+        sourceCurrency=sourceCurrency,
+        targetCurrency=currency,
+        access_token=decrypt_transferwise_token(
+            user.transferwise_token
+        ),
+        targetAmount=amount
+    )
     print(quote.status_code)
 
     if quote.status_code == 422:
         print("Unsupported currency, defaulting to GBP")
         sourceCurrency = 'GBP'
-        quote = createTransferWiseQuote(profileId = profileId, sourceCurrency = sourceCurrency, targetCurrency = currency, access_token = decrypt_transferwise_token(user.transferwise_token), targetAmount = amount)
+        quote = createTransferWiseQuote(
+            profileId=profileId,
+            sourceCurrency=sourceCurrency,
+            targetCurrency=currency,
+            access_token=decrypt_transferwise_token(
+                user.transferwise_token
+            ),
+            targetAmount=amount
+        )
 
     if quote.status_code == 401:
         return str(quote.error_message)
@@ -399,9 +495,16 @@ def pay():
     end_time = time.time()
     print("Quote Time: " + str(end_time - start_time))
 
-
     recipientId = json.loads(recipient.text)['id']
-    transfer = createPayment(recipientId = recipientId, quoteId = quoteId, reference = 'Slackwise', access_token = decrypt_transferwise_token(user.transferwise_token))
+    transfer = createPayment(
+        recipientId=recipientId,
+        quoteId=quoteId,
+        reference='Slackwise',
+        access_token=decrypt_transferwise_token(
+            user.transferwise_token
+        )
+    )
+
     if transfer.status_code == 401:
         return str(json.loads(transfer.text))
 
@@ -418,26 +521,52 @@ def pay():
         return "Failed to pay"
 
     else:
-        return 'Click here to pay: https://transferwise.com/transferFlow#/transfer/' + str(transferId)
+        return 'Click here to pay: \
+        https://transferwise.com/transferFlow#/transfer/' + str(transferId)
+
 
 @app.route('/home-currency', methods=['POST'])
 def home_currency():
     if not verify_slack_request(request):
         return 'Request verification failed'
 
-    home_currency  = request.form.get('text')
-    print(home_currency)
+    home_currency = request.form.get('text')
+    print('Home currency switched to ' + home_currency)
 
     if home_currency == "":
+        slack_id = request.form.get('user_id')
         user = User.query.filter_by(slack_id=slack_id).first()
         return user.home_currency
 
     home_currency = home_currency.upper()
 
-    if home_currency not in ['USD','AUD','BGN','BRL','CAD','CHF','CZK','DKK','EUR','GBP','HKD','HRK','HUF','JPY','NOK','NZD','PLN','RON','SEK','SGD','TRY']:
+    currencies = [
+        'USD',
+        'AUD',
+        'BGN',
+        'BRL',
+        'CAD',
+        'CHF',
+        'CZK',
+        'DKK',
+        'EUR',
+        'GBP',
+        'HKD',
+        'HRK',
+        'HUF',
+        'JPY',
+        'NOK',
+        'NZD',
+        'PLN',
+        'RON',
+        'SEK',
+        'SGD',
+        'TRY'
+    ]
+    if home_currency not in currencies:
         return "Currency not supported"
 
-    if is_prod == 'True':    
+    if is_prod == 'True':
         slack_id = request.form.get('user_id')
     else:
         slack_id = 'UBH7TETRB'
@@ -445,12 +574,14 @@ def home_currency():
     user = User.query.filter_by(slack_id=slack_id).first()
 
     if user is None:
-        return 'Please connect your Slack account first at slackwise.herokuapp.com'
+        return 'Please connect your Slack account first at \
+        slackwise.herokuapp.com'
 
     user.home_currency = home_currency
     db.session.commit()
 
     return "Home currency updated"
+
 
 @app.route('/latest', methods=['POST'])
 def lastest():
@@ -468,28 +599,35 @@ def lastest():
     slack_id = request.form.get('user_id')
     user = User.query.filter_by(slack_id=slack_id).first()
 
-    startDate = datetime.today() - timedelta(days=1)
-    endDate = datetime.today()
-
-    borderlessId = getBorderlessAccountId(user.transferwise_profile_id, decrypt_transferwise_token(user.transferwise_token))
+    borderlessId = getBorderlessAccountId(
+        user.transferwise_profile_id,
+        decrypt_transferwise_token(
+            user.transferwise_token
+        )
+    )
 
     if len(json.loads(borderlessId.text)) < 1:
         return 'You need to have a borderless account to use the Slack bot'
 
     if borderlessId.status_code != 200:
-        return str(profiles.status_code)
+        return str(borderlessId.status_code)
 
     borderlessAccountId = json.loads(borderlessId.text)[0]['id']
 
-    activity = getBorderlessActivity(borderlessAccountId, decrypt_transferwise_token(user.transferwise_token))
+    activity = getBorderlessActivity(
+        borderlessAccountId,
+        decrypt_transferwise_token(
+            user.transferwise_token
+        )
+    )
     activity = json.loads(activity.text)
 
-    text="Your latest borderless activity: \n"
+    text = "Your latest borderless activity: \n"
     for b in activity:
 
         activityType = str(b['type'])
         print(activityType)
-        
+
         if b['type'] in ['WITHDRAWAL', 'DEPOSIT']:
             currency = str(b['amount']['currency'])
 
@@ -502,16 +640,25 @@ def lastest():
             elif activityType == 'WITHDRAWAL':
                 activityType = ':wave:'
 
-            text+= str(currency) + str(b['amount']['value']) + " " + str(b['amount']['currency']) +  " " + activityType + " " + str(b['type']) + " " + str(b['creationTime'])[0:10] + " " + str(b['creationTime'])[11:16] + "\n"
+            text += str(currency) + \
+                str(b['amount']['value']) + " " + \
+                str(b['amount']['currency']) + " " + \
+                activityType + " " + str(b['type']) + " " + \
+                str(b['creationTime'])[0:10] + " " + \
+                str(b['creationTime'])[11:16] + "\n"
 
-        elif  b['type'] == 'CONVERSION':
+        elif b['type'] == 'CONVERSION':
             activityType = ':currency_exchange:'
-            text += activityType + str(b['sourceAmount']['value']) + " "  + str(b['sourceAmount']['currency']) + " to "  + str(b['targetAmount']['value']) + " "  + str(b['targetAmount']['currency']) + '\n'
+            text += activityType + str(b['sourceAmount']['value']) + " " \
+                + str(b['sourceAmount']['currency']) + " to " \
+                + str(b['targetAmount']['value']) + " " \
+                + str(b['targetAmount']['currency']) + '\n'
 
         else:
-            text+= b['type'] + '\n'
-            
+            text += b['type'] + '\n'
+
     return str(text)
+
 
 @app.route('/switch-profile', methods=['POST'])
 def profile():
@@ -519,15 +666,23 @@ def profile():
         return 'Request verification failed'
 
     slack_id = request.form.get('user_id')
-    user = User.query.filter_by(slack_id = slack_id).first()
-    print('Previous TransferWise profile: ' + str(user.transferwise_profile_id))
-    profiles = getTransferWiseProfiles(access_token = decrypt_transferwise_token(user.transferwise_token))
+    user = User.query.filter_by(slack_id=slack_id).first()
+    print(
+        'Previous TransferWise profile: ' + str(
+            user.transferwise_profile_id
+        )
+    )
+    profiles = getTransferWiseProfiles(
+        access_token=decrypt_transferwise_token(
+            user.transferwise_token
+        )
+    )
 
     if profiles.status_code != 200:
         print(str(profiles.status_code))
         return 'Error.'
 
-    if(len(json.loads(profiles.text))==1):
+    if(len(json.loads(profiles.text)) == 1):
         return 'You only have one profile.'
 
     personalProfileId = json.loads(profiles.text)[0]['id']
@@ -535,12 +690,16 @@ def profile():
     if user.transferwise_profile_id == personalProfileId:
         user.transferwise_profile_id = json.loads(profiles.text)[1]['id']
         db.session.commit()
-        return 'Active TransferWise profile: ' + json.loads(profiles.text)[1]['details']['name']
+        return 'Active TransferWise profile: ' \
+            + json.loads(profiles.text)[1]['details']['name']
 
     else:
         user.transferwise_profile_id = json.loads(profiles.text)[0]['id']
         db.session.commit()
-        return 'Active TransferWise profile: ' + json.loads(profiles.text)[0]['details']['firstName'] + ' ' + json.loads(profiles.text)[0]['details']['lastName']
+        return 'Active TransferWise profile: ' \
+            + json.loads(profiles.text)[0]['details']['firstName'] + ' ' \
+            + json.loads(profiles.text)[0]['details']['lastName']
+
 
 @app.route('/transferwise-bot-feedback', methods=['POST'])
 def feedback():
@@ -554,4 +713,3 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=port)
-
