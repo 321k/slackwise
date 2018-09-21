@@ -38,37 +38,46 @@ class User(BaseModel):
                  transferwise_token=None,
                  slack_id=None, email=None,
                  transferwise_profile_id=None,
-                 home_currency=None,
-                 encrypted_tw_token=None):
+                 home_currency=None):
+
+        if transferwise_token is None:
+            encrypted_tw_token = None
+        else:
+            encrypted_tw_token = encrypt_transferwise_token(
+                transferwise_token
+            ),
         self.slack_id = slack_id
         self.slack_token = slack_token
         self.transferwise_token = transferwise_token
         self.email = email
         self.transferwise_profile_id = transferwise_profile_id
         self.home_currency = home_currency
-        self.encrypted_tw_token = encrypt_transferwise_token(
-            encrypted_tw_token
-        )
+        self.encrypted_tw_token = encrypted_tw_token
 
     def __repr__(self):
-        if self.encrypted_tw_token is None:
-            encrypted_tw_token = None
+        if self.transferwise_token is None:
+            token = None
         else:
-            decoded_token = base64.b64decode(self.encrypted_tw_token)
-            key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
-            encrypted_tw_token = str(decrypt(key, decoded_token))
+            token = self.transferwise_token
+            #token = decrypt_transferwise_token(
+            #    self.encrypted_tw_token
+            #),
         return json.dumps({
             'slack_id': self.slack_id,
             'slack_token': self.slack_token,
-            'transferwise_token': decrypt_transferwise_token(
-                encrypted_tw_token
-            ),
+            'transferwise_token': token,
             'email': self.email,
             'transferwise_profile_id': self.transferwise_profile_id,
             'home_currency': self.home_currency})
 
     def addEncryptedToken(self, token):
-        self.encrypted_tw_token.append(encrypt_transferwise_token(token))
+        self.encrypted_tw_token = encrypt_transferwise_token(token)
 
     def getToken(self):
         return decrypt_transferwise_token(self.encrypted_tw_token)
+
+
+x = User(transferwise_token='asdf')
+print(str(x))
+x.encrypted_tw_token = 'asdf'
+print(x)
