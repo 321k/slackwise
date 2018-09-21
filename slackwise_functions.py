@@ -110,3 +110,41 @@ def decrypt_transferwise_token(token):
     encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
     return decrypt(encryption_key, base64.b64decode(token)).decode('utf-8')
 
+
+def print_balance_activity(activity):
+    # Uses the response from getBorderlessActivity()
+    # to generate a print version suitable for slack
+
+    text = "Your latest borderless activity: \n"
+    for b in activity:
+        activityType = str(b['type'])
+        if b['type'] in ['WITHDRAWAL', 'DEPOSIT']:
+            currency = str(b['amount']['currency'])
+
+            currency = currency_to_flag(currency)
+
+            activityType = str(b['type'])
+
+            if activityType == 'DEPOSIT':
+                activityType = ':moneybag:'
+            elif activityType == 'WITHDRAWAL':
+                activityType = ':wave:'
+
+            text += str(currency) + \
+                str(b['amount']['value']) + " " + \
+                str(b['amount']['currency']) + " " + \
+                activityType + " " + str(b['type']) + " " + \
+                str(b['creationTime'])[0:10] + " " + \
+                str(b['creationTime'])[11:16] + "\n"
+
+        elif b['type'] == 'CONVERSION':
+            activityType = ':currency_exchange:'
+            text += activityType + str(b['sourceAmount']['value']) + " " \
+                + str(b['sourceAmount']['currency']) + " to " \
+                + str(b['targetAmount']['value']) + " " \
+                + str(b['targetAmount']['currency']) + '\n'
+
+        else:
+            text += b['type'] + '\n'
+
+    return text

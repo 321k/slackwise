@@ -10,7 +10,7 @@ import base64
 from flask import Flask, \
     render_template, url_for, request, redirect, session, flash, make_response
 from slackwise_functions import verify_slack_request, \
-    encrypt_transferwise_token, currency_to_flag, decrypt_transferwise_token
+    currency_to_flag, print_balance_activity
 from transferwiseclient.transferwiseclient import getTransferWiseProfiles, \
     createTransferWiseRecipient, createTransferWiseQuote, createPayment, \
     getBorderlessAccountId, getBorderlessAccounts, getBorderlessActivity
@@ -541,7 +541,7 @@ def home_currency():
 
     home_currency = home_currency.upper()
 
-    currencies = [
+    supported_currencies = [
         'USD',
         'AUD',
         'BGN',
@@ -564,7 +564,7 @@ def home_currency():
         'SGD',
         'TRY'
     ]
-    if home_currency not in currencies:
+    if home_currency not in supported_currencies:
         return "Currency not supported"
 
     if is_prod == 'True':
@@ -591,14 +591,6 @@ def lastest():
     if not verify_slack_request(request):
         return 'Request verification failed'
 
-    text = request.form.get('text')
-    if text is None:
-        limit = 5
-    elif text.isdigit():
-        limit = min(int(text), 10)
-    else:
-        limit = 5
-
     slack_id = request.form.get('user_id')
     user = User.query.filter_by(slack_id=slack_id).first()
 
@@ -624,43 +616,10 @@ def lastest():
         user.getToken()
     )
     activity = json.loads(activity.text)
-
-    text = "Your latest borderless activity: \n"
-    for b in activity:
-
-        activityType = str(b['type'])
-        print(activityType)
-
-        if b['type'] in ['WITHDRAWAL', 'DEPOSIT']:
-            currency = str(b['amount']['currency'])
-
-            currency = currency_to_flag(currency)
-
-            activityType = str(b['type'])
-
-            if activityType == 'DEPOSIT':
-                activityType = ':moneybag:'
-            elif activityType == 'WITHDRAWAL':
-                activityType = ':wave:'
-
-            text += str(currency) + \
-                str(b['amount']['value']) + " " + \
-                str(b['amount']['currency']) + " " + \
-                activityType + " " + str(b['type']) + " " + \
-                str(b['creationTime'])[0:10] + " " + \
-                str(b['creationTime'])[11:16] + "\n"
-
-        elif b['type'] == 'CONVERSION':
-            activityType = ':currency_exchange:'
-            text += activityType + str(b['sourceAmount']['value']) + " " \
-                + str(b['sourceAmount']['currency']) + " to " \
-                + str(b['targetAmount']['value']) + " " \
-                + str(b['targetAmount']['currency']) + '\n'
-
-        else:
-            text += b['type'] + '\n'
+    text = print_balance_activity(activity)
 
     print("Completed " + str(time.time() - start_time))
+
     return str(text)
 
 
