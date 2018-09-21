@@ -10,7 +10,7 @@ import base64
 from flask import Flask, \
     render_template, url_for, request, redirect, session, flash, make_response
 from slackwise_functions import verify_slack_request, \
-    currency_to_flag, decrypt_transferwise_token
+    encrypt_transferwise_token, currency_to_flag, decrypt_transferwise_token
 from transferwiseclient.transferwiseclient import getTransferWiseProfiles, \
     createTransferWiseRecipient, createTransferWiseQuote, createPayment, \
     getBorderlessAccountId, getBorderlessAccounts, getBorderlessActivity
@@ -258,8 +258,7 @@ def oauth():
 
     user = User.query.filter_by(slack_id=slack_id).first()
 
-    user.transferwise_token = token
-    user.addEncryptedToken(token)
+    user.addEncryptedToken(user.transferwise_token)
 
     user.transferwise_profile_id = profileId
     user.home_currency = sourceCurrency
@@ -315,7 +314,7 @@ def transferwise():
 
     if user.transferwise_token is not None:
         profiles = getTransferWiseProfiles(
-            access_token=decrypt_transferwise_token(user.transferwise_token)
+            access_token=decrypt_transferwise_token(user.encrypted_tw_token)
         )
         if profiles.status_code == 200:
             return 'TransferWise account connected'
@@ -353,7 +352,7 @@ def borderless():
 
     borderless = getBorderlessAccountId(
         profileId=user.transferwise_profile_id,
-        access_token=decrypt_transferwise_token(user.transferwise_token)
+        access_token=decrypt_transferwise_token(user.encrypted_tw_token)
     )
 
     if borderless.status_code != 200:
@@ -364,7 +363,7 @@ def borderless():
     borderlessId = json.loads(borderless.text)[0]['id']
     accounts = getBorderlessAccounts(
         borderlessId=borderlessId,
-        access_token=decrypt_transferwise_token(user.transferwise_token)
+        access_token=decrypt_transferwise_token(user.encrypted_tw_token)
     )
 
     if accounts.status_code != 200:
@@ -446,7 +445,7 @@ def pay():
         legalType='PRIVATE',
         profileId=profileId,
         access_token=decrypt_transferwise_token(
-            user.transferwise_token
+            user.encrypted_tw_token
         )
     )
     print(recipient)
@@ -470,7 +469,7 @@ def pay():
         sourceCurrency=sourceCurrency,
         targetCurrency=currency,
         access_token=decrypt_transferwise_token(
-            user.transferwise_token
+            user.encrypted_tw_token
         ),
         targetAmount=amount
     )
@@ -484,7 +483,7 @@ def pay():
             sourceCurrency=sourceCurrency,
             targetCurrency=currency,
             access_token=decrypt_transferwise_token(
-                user.transferwise_token
+                user.encrypted_tw_token
             ),
             targetAmount=amount
         )
@@ -503,7 +502,7 @@ def pay():
         quoteId=quoteId,
         reference='Slackwise',
         access_token=decrypt_transferwise_token(
-            user.transferwise_token
+            user.encrypted_tw_token
         )
     )
 
@@ -600,11 +599,13 @@ def lastest():
 
     slack_id = request.form.get('user_id')
     user = User.query.filter_by(slack_id=slack_id).first()
+    user.encrypted_tw_token = encrypt_transferwise_token(user.transferwise_token)
+    db.session.commit()
 
     borderlessId = getBorderlessAccountId(
         user.transferwise_profile_id,
         decrypt_transferwise_token(
-            user.transferwise_token
+            user.encrypted_tw_token
         )
     )
 
@@ -619,7 +620,7 @@ def lastest():
     activity = getBorderlessActivity(
         borderlessAccountId,
         decrypt_transferwise_token(
-            user.transferwise_token
+            user.encrypted_tw_token
         )
     )
     activity = json.loads(activity.text)
@@ -676,7 +677,7 @@ def profile():
     )
     profiles = getTransferWiseProfiles(
         access_token=decrypt_transferwise_token(
-            user.transferwise_token
+            user.encrypted_tw_token
         )
     )
 

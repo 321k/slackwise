@@ -47,7 +47,6 @@ def verify_slack_request(request):
         return False
 
 
-
 def currency_to_flag(currency):
     if currency == 'USD':
         currency = ':flag-us: '
@@ -102,11 +101,12 @@ def currency_to_flag(currency):
     return currency
 
 
-def decrypt_transferwise_token(token):
-    encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
-    return str(decrypt(encryption_key, base64.b64decode(token)))
-
-
 def encrypt_transferwise_token(token):
     encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
-    return str(base64.b64encode(encrypt(encryption_key, token)))
+    return base64.b64encode(encrypt(encryption_key, token))
+
+
+def decrypt_transferwise_token(token):
+    encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
+    return decrypt(encryption_key, base64.b64decode(token)).decode('utf-8')
+

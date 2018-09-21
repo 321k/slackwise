@@ -5,7 +5,7 @@ from simplecrypt import decrypt
 import os
 import base64
 from slackwise_functions import encrypt_transferwise_token, \
-decrypt_transferwise_token
+    decrypt_transferwise_token
 
 db = SQLAlchemy()
 
@@ -24,7 +24,7 @@ class User(BaseModel):
     slack_id = db.Column(db.String(120))
     slack_token = db.Column(db.String(120))
     transferwise_token = db.Column(db.String(120))
-    encrypted_tw_token = db.Column(db.String(240))
+    encrypted_tw_token = db.Column(db.LargeBinary(240))
     transferwise_profile_id = db.Column(db.Integer)
     home_currency = db.Column(db.String(120))
     email = db.Column(db.String(120))
@@ -38,14 +38,8 @@ class User(BaseModel):
                  transferwise_token=None,
                  slack_id=None, email=None,
                  transferwise_profile_id=None,
-                 home_currency=None):
-
-        if transferwise_token is None:
-            encrypted_tw_token = None
-        else:
-            encrypted_tw_token = encrypt_transferwise_token(
-                transferwise_token
-            ),
+                 home_currency=None,
+                 encrypted_tw_token=None):
         self.slack_id = slack_id
         self.slack_token = slack_token
         self.transferwise_token = transferwise_token
@@ -59,9 +53,6 @@ class User(BaseModel):
             token = None
         else:
             token = self.transferwise_token
-            #token = decrypt_transferwise_token(
-            #    self.encrypted_tw_token
-            #),
         return json.dumps({
             'slack_id': self.slack_id,
             'slack_token': self.slack_token,
@@ -75,9 +66,3 @@ class User(BaseModel):
 
     def getToken(self):
         return decrypt_transferwise_token(self.encrypted_tw_token)
-
-
-x = User(transferwise_token='asdf')
-print(str(x))
-x.encrypted_tw_token = 'asdf'
-print(x)
