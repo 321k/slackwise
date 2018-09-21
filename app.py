@@ -14,7 +14,7 @@ from slackwise_functions import verify_slack_request, \
 from transferwiseclient.transferwiseclient import getTransferWiseProfiles, \
     createTransferWiseRecipient, createTransferWiseQuote, createPayment, \
     getBorderlessAccountId, getBorderlessAccounts, getBorderlessActivity
-
+from tasks import make_celery
 
 # Declare global variables
 global slack_token
@@ -36,11 +36,14 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = encryption_key
     app.config['DEBUG'] = True
+    app.config['CELERY_BROKER_URL'] = os.environ.get('REDIS_URL', None)
+    app.config['CELERY_BACKEND'] = os.environ.get('REDIS_URL', None)
     app.static_folder = 'static'
     return app
 
 
 app = create_app()
+celery = make_celery(app)
 
 
 # Congiguring database
@@ -70,6 +73,21 @@ db.init_app(app)
 port = int(os.environ.get('PORT', 5000))
 
 
+@celery.task()
+def add_together(a, b):
+    return a + b
+
+
+@app.route('/process/<name>')
+def process(name):
+    reverse.delay(name)
+    return reverse(name)
+
+
+@celery.task(name='celery_example.reverse')
+def reverse(string):
+    return string[::-1]
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -78,70 +96,6 @@ def index():
 @app.route('/privacy')
 def privacy():
     return render_template('privacy-policy.html')
-
-
-@app.route('/slack')
-def slack():
-    if is_prod == 'True':
-        code = request.args.get('code')
-        payload = {'client_id': '387079239778.387986429910',
-                   'client_secret': '12df7e70460efc4c8c6e8a1cea961612',
-                   'scope': 'users.profile:read+identity.basic',
-                   'code': code}
-        response = requests.get('https://slack.com/api/oauth.access',
-                                params=payload,
-                                headers={
-                                    'Content-Type':
-                                    'application/x-www-form-urlencoded'})
-        oauth = json.loads(response.text)
-        print(str(oauth['ok']))
-
-    else:
-        oauth = {'access_token': 'xoxp-XXXXXXXX-XXXXXXXX-XXXXX',
-                 'scope': 'users.profile:read',
-                 'team_name': 'TransferWise',
-                 'team_id': 'TXXXXXXXXX'}
-
-    if 'error' in oauth:
-        print('Failed to authenticate to Slack')
-        return 'Failed to authenticate to Slack'
-
-    token = oauth['access_token']
-    print("Slack token: " + token)
-
-    payload = {'token': token}
-    response = requests.get('https://slack.com/api/users.identity',
-                            params=payload,
-                            headers={
-                                'Content-Type':
-                                'application/x-www-form-urlencoded'})
-    userIdentity = json.loads(response.text)
-    print('Success: ' + str(userIdentity['ok']))
-
-    if userIdentity['ok'] is True:
-        user = User.query.filter_by(slack_token=token).first()
-        if user is None:
-            user = User(slack_token=token, slack_id=userIdentity['user']['id'])
-            db.session.add(user)
-            db.session.commit()
-
-        elif user.slack_id is None:
-            user.slack_id = userIdentity['user']['id']
-            db.session.commit()
-
-        if user.email is None:
-            payload = {'token': token, 'user': user.slack_id}
-            response = requests.get('https://slack.com/api/users.profile.get',
-                                    params=payload,
-                                    headers={
-                                        'Content-Type':
-                                        'application/x-www-form-urlencoded'})
-            userProfile = json.loads(response.text)
-            if userProfile['ok'] is True:
-                user.email = userProfile['profile']['email']
-                db.session.commit()
-
-    return redirect(url_for('index'))
 
 
 @app.route('/oauth', methods=['GET'])
@@ -673,3 +627,5 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=port)
+
+
