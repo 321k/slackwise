@@ -359,8 +359,7 @@ def borderless():
     if borderless.status_code != 200:
         return str(borderless.status_code)
 
-    print("Borderless ID: " + str(json.loads(borderless.text)) +
-          " fetched in " + str(time.time() - start_time))
+    print("Borderless ID fetched in " + str(time.time() - start_time))
 
     if len(json.loads(borderless.text)) < 1:
         return 'You need to have a borderless account to use the Slack bot'
