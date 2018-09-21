@@ -23,7 +23,6 @@ class User(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     slack_id = db.Column(db.String(120))
     slack_token = db.Column(db.String(120))
-    transferwise_token = db.Column(db.String(120))
     encrypted_tw_token = db.Column(db.LargeBinary(240))
     transferwise_profile_id = db.Column(db.Integer)
     home_currency = db.Column(db.String(120))
@@ -35,24 +34,22 @@ class User(BaseModel):
 
     def __init__(self,
                  slack_token=None,
-                 transferwise_token=None,
                  slack_id=None, email=None,
                  transferwise_profile_id=None,
                  home_currency=None,
                  encrypted_tw_token=None):
         self.slack_id = slack_id
         self.slack_token = slack_token
-        self.transferwise_token = transferwise_token
         self.email = email
         self.transferwise_profile_id = transferwise_profile_id
         self.home_currency = home_currency
         self.encrypted_tw_token = encrypted_tw_token
 
     def __repr__(self):
-        if self.transferwise_token is None:
+        if self.encrypted_tw_token is None:
             token = None
         else:
-            token = self.transferwise_token
+            token = str(self.encrypted_tw_token)
         return json.dumps({
             'slack_id': self.slack_id,
             'slack_token': self.slack_token,
@@ -66,3 +63,4 @@ class User(BaseModel):
 
     def getToken(self):
         return decrypt_transferwise_token(self.encrypted_tw_token)
+

@@ -18,14 +18,12 @@ from transferwiseclient.transferwiseclient import getTransferWiseProfiles, \
 
 # Declare global variables
 global slack_token
-global transferwise_token
-global api_key
 
 # Environment variables
 is_prod = os.environ.get('IS_HEROKU', None)
 slack_token = os.environ.get('SLACK_TOKEN', None)
 port = int(os.environ.get('PORT', 5000))
-api_key = os.environ.get('TRANSFERWISE_KEY', None)
+
 encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
 
 if is_prod == 'True':
@@ -159,7 +157,7 @@ def oauth():
         flash(message, 'alert-warning')
         return render_template('index.html')
 
-    global api_key
+    api_key = os.environ.get('TRANSFERWISE_KEY', None)
 
     if 'slack_id' in session:
         slack_id = session['slack_id']
@@ -258,8 +256,7 @@ def oauth():
 
     user = User.query.filter_by(slack_id=slack_id).first()
 
-    token = encrypt_transferwise_token(user.transferwise_token)
-    user.encrypted_tw_token = token
+    user.encrypted_tw_token = addEncryptedToken(token)
     user.transferwise_profile_id = profileId
     user.home_currency = sourceCurrency
     db.session.commit()
@@ -314,7 +311,7 @@ def transferwise():
 
     if user.encrypted_tw_token is not None:
         profiles = getTransferWiseProfiles(
-            access_token=decrypt_transferwise_token(user.encrypted_tw_token)
+            access_token=user.getToken()
         )
         if profiles.status_code == 200:
             return 'TransferWise account connected'
@@ -356,7 +353,7 @@ def borderless():
 
     borderless = getBorderlessAccountId(
         profileId=user.transferwise_profile_id,
-        access_token=decrypt_transferwise_token(user.encrypted_tw_token)
+        access_token=user.getToken()
     )
 
     if borderless.status_code != 200:
@@ -371,7 +368,7 @@ def borderless():
     borderlessId = json.loads(borderless.text)[0]['id']
     accounts = getBorderlessAccounts(
         borderlessId=borderlessId,
-        access_token=decrypt_transferwise_token(user.encrypted_tw_token)
+        access_token=user.getToken()
     )
 
     print("Borderless accounts fetched in " + str(time.time() - start_time))
@@ -455,9 +452,7 @@ def pay():
         name=name,
         legalType='PRIVATE',
         profileId=profileId,
-        access_token=decrypt_transferwise_token(
-            user.encrypted_tw_token
-        )
+        access_token=user.getToken()
     )
     print(recipient)
 
@@ -479,9 +474,7 @@ def pay():
         profileId=profileId,
         sourceCurrency=sourceCurrency,
         targetCurrency=currency,
-        access_token=decrypt_transferwise_token(
-            user.encrypted_tw_token
-        ),
+        access_token=user.getToken(),
         targetAmount=amount
     )
     print(quote.status_code)
@@ -493,9 +486,7 @@ def pay():
             profileId=profileId,
             sourceCurrency=sourceCurrency,
             targetCurrency=currency,
-            access_token=decrypt_transferwise_token(
-                user.encrypted_tw_token
-            ),
+            access_token=user.getToken(),
             targetAmount=amount
         )
 
@@ -512,9 +503,7 @@ def pay():
         recipientId=recipientId,
         quoteId=quoteId,
         reference='Slackwise',
-        access_token=decrypt_transferwise_token(
-            user.encrypted_tw_token
-        )
+        access_token=user.getToken()
     )
 
     if transfer.status_code == 401:
@@ -617,9 +606,7 @@ def lastest():
 
     borderlessId = getBorderlessAccountId(
         user.transferwise_profile_id,
-        decrypt_transferwise_token(
-            user.encrypted_tw_token
-        )
+        user.getToken()
     )
 
     if len(json.loads(borderlessId.text)) < 1:
@@ -634,9 +621,7 @@ def lastest():
 
     activity = getBorderlessActivity(
         borderlessAccountId,
-        decrypt_transferwise_token(
-            user.encrypted_tw_token
-        )
+        user.getToken()
     )
     activity = json.loads(activity.text)
 
@@ -692,9 +677,7 @@ def profile():
         )
     )
     profiles = getTransferWiseProfiles(
-        access_token=decrypt_transferwise_token(
-            user.encrypted_tw_token
-        )
+        access_token=user.getToken()
     )
 
     if profiles.status_code != 200:
