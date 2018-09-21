@@ -363,7 +363,10 @@ def borderless():
         return str(borderless.status_code)
 
     print("Borderless ID: " + str(json.loads(borderless.text)) +
-          " fetched in " + time.time() - start_time)
+          " fetched in " + str(time.time() - start_time))
+
+    if len(json.loads(borderless.text)) < 1:
+        return 'You need to have a borderless account to use the Slack bot'
 
     borderlessId = json.loads(borderless.text)[0]['id']
     accounts = getBorderlessAccounts(
@@ -371,7 +374,7 @@ def borderless():
         access_token=decrypt_transferwise_token(user.encrypted_tw_token)
     )
 
-    print("Borderless accounts fetched in " + time.time() - start_time)
+    print("Borderless accounts fetched in " + str(time.time() - start_time))
 
     if accounts.status_code != 200:
         return str(accounts.status_code)
@@ -384,7 +387,7 @@ def borderless():
         text += currency + " " + str(b['amount']['value']) + \
             " " + str(b['amount']['currency']) + "\n"
 
-    print("Completed in " + time.time() - start_time)
+    print("Completed in " + str(time.time() - start_time))
     return text
 
 
@@ -610,7 +613,7 @@ def lastest():
     slack_id = request.form.get('user_id')
     user = User.query.filter_by(slack_id=slack_id).first()
 
-    print("User fetched " + time.time() - start_time)
+    print("User fetched " + str(time.time() - start_time))
 
     borderlessId = getBorderlessAccountId(
         user.transferwise_profile_id,
@@ -627,7 +630,7 @@ def lastest():
 
     borderlessAccountId = json.loads(borderlessId.text)[0]['id']
 
-    print("Activity fetched " + time.time() - start_time)
+    print("Activity fetched " + str(time.time() - start_time))
 
     activity = getBorderlessActivity(
         borderlessAccountId,
@@ -672,7 +675,7 @@ def lastest():
         else:
             text += b['type'] + '\n'
 
-    print("Completed " + time.time() - start_time)
+    print("Completed " + str(time.time() - start_time))
     return str(text)
 
 
