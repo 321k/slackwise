@@ -113,7 +113,9 @@ def encrypt_transferwise_token(plaintext):
         return 'Incorrect input'
 
     secret = os.environ.get('ENCRYPTION_KEY',
-                            b'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                            'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    secret = secret.encode('utf-8')
+
     cipher = Salsa20.new(key=secret)
     msg = cipher.nonce + cipher.encrypt(plaintext)
     return msg
@@ -124,7 +126,9 @@ def decrypt_transferwise_token(msg):
         return 'Incorrect input'
 
     secret = os.environ.get('ENCRYPTION_KEY',
-                            b'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                            'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    secret = secret.encode('utf-8')
+
     msg_nonce=msg[:8]
     ciphertext=msg[8:]
     cipher = Salsa20.new(key=secret, nonce=msg_nonce)
