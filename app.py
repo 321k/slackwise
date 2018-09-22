@@ -81,12 +81,14 @@ def reverse(text):
 
 @celery.task(name='app.celery_latest')
 def celery_latest(profileId, token, response_url):
+    print('attempting to check balance activity')
     activity = get_latest_borderless_activity(profileId, token)
     response = requests.post(response_url,
                              data=json.dumps({'response_type': 'ephemeral',
-                                   'text': activity}),
+                                              'text': activity}),
                              headers={'Content-type': 'application/json'}
                              )
+    print(response.status_code)
     return str(response.status_code)
 
 
