@@ -133,6 +133,8 @@ def decrypt_transferwise_token(msg):
     ciphertext=msg[8:]
     cipher = Salsa20.new(key=secret, nonce=msg_nonce)
     plaintext = cipher.decrypt(ciphertext)
+    print('decrypt result')
+    print(plaintext)
     return plaintext.decode('utf-8')
 
 

@@ -25,7 +25,7 @@ is_prod = os.environ.get('IS_HEROKU', None)
 slack_token = os.environ.get('SLACK_TOKEN', None)
 port = int(os.environ.get('PORT', 5000))
 
-encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
+encryption_key = os.environ.get('ENCRYPTION_KEY', 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 
 if is_prod == 'True':
     static_url = 'http://slackwise.herokuapp.com'
