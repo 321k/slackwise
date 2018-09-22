@@ -190,13 +190,7 @@ def transferwise():
     slack_id = request.form.get('user_id')
     user = User.query.filter_by(slack_id=slack_id).first()
 
-    if user is not None:
-        token = user.getToken()
-
-    print(app.secret_key)
-
     session['slack_id'] = slack_id
-
     print('Slack ID ' + str(session['slack_id']) + ' added to session.')
 
     if text == 'delete':
@@ -216,6 +210,7 @@ def transferwise():
         db.session.commit()
 
     if user.encrypted_tw_token is not None:
+        token = user.getToken()
         profiles = getTransferWiseProfiles(
             access_token=token
         )
