@@ -80,8 +80,14 @@ def reverse(text):
 
 
 @celery.task(name='app.celery_latest')
-def celery_latest(profileId, token):
-    return get_latest_borderless_activity(profileId, token)
+def celery_latest(profileId, token, response_url):
+    activity = get_latest_borderless_activity(profileId, token)
+    response = requests.post(response_url,
+                             data={'response_type': 'ephemeral',
+                                   'text': activity},
+                             headers={'Content-type': 'application/json'}
+                             )
+    return response
 
 
 @app.route('/process/<name>')
@@ -496,6 +502,7 @@ def lastest():
     if not verify_slack_request(request):
         return 'Request verification failed'
 
+    response_url = request.form.get('response_url')
     slack_id = request.form.get('user_id')
     user = User.query.filter_by(slack_id=slack_id).first()
 
@@ -507,7 +514,7 @@ def lastest():
     if token is None:
         return 'Error'
 
-    celery_latest.delay(profileId, token)
+    celery_latest.delay(profileId, token, response_url)
 
     return 'Processing'
 
