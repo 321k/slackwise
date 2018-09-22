@@ -177,10 +177,10 @@ def print_balance_activity(activity):
     return text
 
 
-def get_latest_borderless_activity(user):
+def get_latest_borderless_activity(profileId, token):
     borderlessId = getBorderlessAccountId(
-        user.transferwise_profile_id,
-        user.getToken()
+        profileId,
+        token
     )
 
     if len(json.loads(borderlessId.text)) < 1:
@@ -193,7 +193,7 @@ def get_latest_borderless_activity(user):
 
     activity = getBorderlessActivity(
         borderlessAccountId,
-        user.getToken()
+        token
     )
     activity = json.loads(activity.text)
     text = print_balance_activity(activity)

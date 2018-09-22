@@ -1,4 +1,3 @@
-from simplecrypt import encrypt, decrypt
 from model import db, User
 import time
 import os
@@ -25,7 +24,8 @@ is_prod = os.environ.get('IS_HEROKU', None)
 slack_token = os.environ.get('SLACK_TOKEN', None)
 port = int(os.environ.get('PORT', 5000))
 
-encryption_key = os.environ.get('ENCRYPTION_KEY', 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+encryption_key = os.environ.get('ENCRYPTION_KEY',
+                                'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 
 if is_prod == 'True':
     static_url = 'http://slackwise.herokuapp.com'
@@ -74,20 +74,20 @@ db.init_app(app)
 port = int(os.environ.get('PORT', 5000))
 
 
-@celery.task()
-def add_together(a, b):
-    return a + b
+@celery.task(name='app.reverse')
+def reverse(text):
+    return text[::-1]
+
+
+@celery.task(name='app.celery_latest')
+def celery_latest(profileId, token):
+    return get_latest_borderless_activity(profileId, token)
 
 
 @app.route('/process/<name>')
 def process(name):
     reverse.delay(name)
-    return reverse(name)
-
-
-@celery.task(name='celery_for_slack.celery_latest')
-def celery_latest(user):
-    return get_latest_borderless_activity(user)
+    return 'Reversing name'
 
 
 @app.route('/')
@@ -305,9 +305,9 @@ def pay():
     text = text.split(' ')
 
     slack_id = request.form.get('user_id')
-    token = user.getToken()
 
     user = User.query.filter_by(slack_id=slack_id).first()
+    token = user.getToken()
 
     if user is None or user.encrypted_tw_token is None:
         return 'Please connect your TransferWise \
@@ -498,9 +498,18 @@ def lastest():
 
     slack_id = request.form.get('user_id')
     user = User.query.filter_by(slack_id=slack_id).first()
-    celery_latest.delay(str(user))
 
-    return 'Thank you'
+    profileId = user.transferwise_profile_id
+    if profileId is None:
+        return 'Error'
+
+    token = user.getToken()
+    if token is None:
+        return 'Error'
+
+    celery_latest.delay(profileId, token)
+
+    return 'Processing'
 
 
 @app.route('/switch-profile', methods=['POST'])
