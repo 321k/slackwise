@@ -63,4 +63,3 @@ class User(BaseModel):
 
     def getToken(self):
         return decrypt_transferwise_token(self.encrypted_tw_token)
-

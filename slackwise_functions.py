@@ -5,7 +5,11 @@ import hmac
 import hashlib
 import base64
 from simplecrypt import encrypt, decrypt
-
+from transferwiseclient.transferwiseclient import getTransferWiseProfiles, \
+    createTransferWiseRecipient, createTransferWiseQuote, createPayment, \
+    getBorderlessAccountId, getBorderlessAccounts, getBorderlessActivity
+import json
+from Crypto.Cipher import Salsa20
 
 def verify_slack_request(request):
     slack_signing_secret = os.environ.get('SLACK_SIGNING_SECRET', None)
@@ -101,14 +105,31 @@ def currency_to_flag(currency):
     return currency
 
 
-def encrypt_transferwise_token(token):
-    encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
-    return base64.b64encode(encrypt(encryption_key, token))
+def encrypt_transferwise_token(plaintext):
+    if (isinstance(plaintext, str)):
+        plaintext = plaintext.encode('utf-8')
+
+    if not (isinstance(plaintext, bytes)):
+        return 'Incorrect input'
+
+    secret = os.environ.get('ENCRYPTION_KEY',
+                            b'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    cipher = Salsa20.new(key=secret)
+    msg = cipher.nonce + cipher.encrypt(plaintext)
+    return msg
 
 
-def decrypt_transferwise_token(token):
-    encryption_key = os.environ.get('ENCRYPTION_KEY', 'dev_key')
-    return decrypt(encryption_key, base64.b64decode(token)).decode('utf-8')
+def decrypt_transferwise_token(msg):
+    if not (isinstance(msg, bytes)):
+        return 'Incorrect input'
+
+    secret = os.environ.get('ENCRYPTION_KEY',
+                            b'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    msg_nonce=msg[:8]
+    ciphertext=msg[8:]
+    cipher = Salsa20.new(key=secret, nonce=msg_nonce)
+    plaintext = cipher.decrypt(ciphertext)
+    return plaintext.decode('utf-8')
 
 
 def print_balance_activity(activity):
@@ -148,3 +169,81 @@ def print_balance_activity(activity):
             text += b['type'] + '\n'
 
     return text
+
+
+def get_latest_borderless_activity(user):
+    borderlessId = getBorderlessAccountId(
+        user.transferwise_profile_id,
+        user.getToken()
+    )
+
+    if len(json.loads(borderlessId.text)) < 1:
+        return 'You need to have a borderless account to use the Slack bot'
+
+    if borderlessId.status_code != 200:
+        return str(borderlessId.status_code)
+
+    borderlessAccountId = json.loads(borderlessId.text)[0]['id']
+
+    activity = getBorderlessActivity(
+        borderlessAccountId,
+        user.getToken()
+    )
+    activity = json.loads(activity.text)
+    text = print_balance_activity(activity)
+
+    return str(text)
+
+
+def decide_user_home_currency(token, profileId):
+    borderlessId = getBorderlessAccountId(
+        profileId=profileId,
+        access_token=token)
+
+    if borderlessId.status_code == 401:
+        return str(borderlessId.error_message)
+
+    if len(json.loads(borderlessId.text)) < 1:
+        return 'You need to have a borderless account to use the Slack bot'
+
+    borderlessId = json.loads(borderlessId.text)[0]['id']
+
+    accounts = getBorderlessAccounts(
+        borderlessId=borderlessId,
+        access_token=token)
+
+    if accounts.status_code == 200:
+        accounts = json.loads(accounts.text)
+
+        # The first record has the highest balance, so we'll default to that
+        homeCurrency = accounts['balances'][0]['amount']['currency']
+
+    currencies = [
+        'USD',
+        'AUD',
+        'BGN',
+        'BRL',
+        'CAD',
+        'CHF',
+        'CZK',
+        'DKK',
+        'EUR',
+        'GBP',
+        'HKD',
+        'HRK',
+        'HUF',
+        'JPY',
+        'NOK',
+        'NZD',
+        'PLN',
+        'RON',
+        'SEK',
+        'SGD',
+        'TRY'
+    ]
+
+    if homeCurrency not in currencies:
+        print("Source currency not valid, assuming GBP")
+        homeCurrency = 'GBP'
+
+    return homeCurrency
