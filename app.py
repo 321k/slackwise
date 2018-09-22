@@ -87,7 +87,7 @@ def celery_latest(profileId, token, response_url):
                                    'text': activity},
                              headers={'Content-type': 'application/json'}
                              )
-    return response
+    return str(response.status_code)
 
 
 @app.route('/process/<name>')
@@ -613,5 +613,3 @@ def attToken():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=port)
-
-
