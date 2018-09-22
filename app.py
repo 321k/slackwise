@@ -83,8 +83,8 @@ def reverse(text):
 def celery_latest(profileId, token, response_url):
     activity = get_latest_borderless_activity(profileId, token)
     response = requests.post(response_url,
-                             data={'response_type': 'ephemeral',
-                                   'text': activity},
+                             data=json.dumps({'response_type': 'ephemeral',
+                                   'text': activity}),
                              headers={'Content-type': 'application/json'}
                              )
     return str(response.status_code)
