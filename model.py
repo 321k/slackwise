@@ -1,9 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import json
-from simplecrypt import decrypt
-import os
-import base64
 from slackwise_functions import encrypt_transferwise_token, \
     decrypt_transferwise_token
 
