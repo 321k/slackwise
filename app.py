@@ -517,9 +517,9 @@ def lastest():
     if token is None:
         return 'Error'
 
-    celery_latest.delay(profileId, token, response_url)
+    activity = get_latest_borderless_activity(profileId, token)
 
-    return 'Processing'
+    return activity
 
 
 @app.route('/switch-profile', methods=['POST'])
