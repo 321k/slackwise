@@ -541,7 +541,8 @@ def profile():
 
     if profiles.status_code != 200:
         print(str(profiles.status_code))
-        return 'Error.'
+        return 'That didn\'t work.\
+ Please make sure you have connected your account using /transferwise.'
 
     if(len(json.loads(profiles.text)) == 1):
         return 'You only have one profile.'
