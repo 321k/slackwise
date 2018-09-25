@@ -511,11 +511,11 @@ def lastest():
 
     profileId = user.transferwise_profile_id
     if profileId is None:
-        return 'Error'
+        return 'Please use /transferwise to connect your TransferWise account'
 
     token = user.getToken()
     if token is None:
-        return 'Error'
+        return 'Please use /transferwise to connect your TransferWise account'
 
     activity = get_latest_borderless_activity(profileId, token)
 
