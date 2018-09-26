@@ -261,10 +261,7 @@ def borderless():
     slack_id = request.form.get('user_id')
     user = User.query.filter_by(slack_id=slack_id).first()
 
-    print("Start fetching token " + str(time.time() - start_time))
     token = user.getToken()
-    print(str(token))
-    print("Token available after " + str(time.time() - start_time))
 
     if user is None:
         user = User(slack_id=slack_id)
@@ -273,17 +270,13 @@ def borderless():
     if user.encrypted_tw_token is None:
         return 'Please connect your TransferWise account using /transferwise'
 
-    end_time = time.time()
-    print("User fetched: " + str(end_time - start_time))
     borderless = getBorderlessAccountId(
         profileId=user.transferwise_profile_id,
         access_token=token
     )
 
     if borderless.status_code != 200:
-        return str(borderless.status_code)
-
-    print("Borderless ID fetched in " + str(time.time() - start_time))
+        return 'Please connect your TransferWise account using /transferwise'
 
     if len(json.loads(borderless.text)) < 1:
         return 'You need to have a borderless account to use the Slack bot'
@@ -293,8 +286,6 @@ def borderless():
         borderlessId=borderlessId,
         access_token=token
     )
-
-    print("Borderless accounts fetched in " + str(time.time() - start_time))
 
     if accounts.status_code != 200:
         return str(accounts.status_code)
@@ -307,7 +298,6 @@ def borderless():
         text += currency + " " + str(b['amount']['value']) + \
             " " + str(b['amount']['currency']) + "\n"
 
-    print("Completed in " + str(time.time() - start_time))
     return text
 
 
@@ -327,14 +317,14 @@ def pay():
     token = user.getToken()
 
     if user is None or user.encrypted_tw_token is None:
-        return 'Please connect your TransferWise \
-        account using /transerwise token'
+        return 'Please connect your TransferWise\
+ account using /transerwise token'
 
     profileId = user.transferwise_profile_id
 
     if profileId is None:
-        return 'Please connect your TransferWise \
-        account using /transerwise token'
+        return 'Please connect your TransferWise\
+ account using /transerwise token'
 
     if len(text) < 3:
         return 'Please use the format /pay email amount currency'
@@ -381,10 +371,10 @@ def pay():
     print(recipient)
 
     if recipient.status_code == 401:
-        return 'Connect your TransferWise account using /transferwise token'
+        return 'Connect your TransferWise account using /transferwise'
 
     if recipient.status_code != 200:
-        return str(recipient.text)
+        return 'Connect your TransferWise account using /transferwise'
 
     end_time = time.time()
     print("Recipient Time: " + str(end_time - start_time))
@@ -446,8 +436,8 @@ def pay():
         return "Failed to pay"
 
     else:
-        return 'Click here to pay: \
-        https://transferwise.com/transferFlow#/transfer/' + str(transferId)
+        return 'Click here to pay:\
+ https://transferwise.com/transferFlow#/transfer/' + str(transferId)
 
 
 @app.route('/home-currency', methods=['POST'])
