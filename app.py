@@ -170,11 +170,11 @@ def oauth():
     user = User.query.filter_by(slack_id=slack_id).first()
 
     if user is None:
-    flash(
-        'That didn\'t work.\
+        flash(
+            'That didn\'t work.\
  Make sure you connect your account by using /transferwise from within Slack.',
-        'alert-success'
-    )
+            'alert-success'
+        )
         return render_template('index.html')
 
     user.addEncryptedToken(token)
