@@ -519,15 +519,16 @@ def lastest():
     user = User.query.filter_by(slack_id=slack_id).first()
 
     profileId = user.transferwise_profile_id
-    if profileId is None:
+    if profileId is None or user is None:
         return 'Please use /transferwise to connect your TransferWise account'
 
-    token = user.getToken()
-    if token is None:
-        return 'Please use /transferwise to connect your TransferWise account'
+    else:
+        token = user.getToken()
+        if token is None:
+            return 'Please use /transferwise to \
+ connect your TransferWise account'
 
     activity = get_latest_borderless_activity(profileId, token)
-
     return activity
 
 
