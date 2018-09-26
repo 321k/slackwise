@@ -251,7 +251,6 @@ def connect():
 
 @app.route('/balances', methods=['POST'])
 def borderless():
-    start_time = time.time()
 
     if not verify_slack_request(request):
         return 'Request verification failed'
@@ -261,13 +260,12 @@ def borderless():
     slack_id = request.form.get('user_id')
     user = User.query.filter_by(slack_id=slack_id).first()
 
-    token = user.getToken()
-
     if user is None:
-        user = User(slack_id=slack_id)
-        db.session.add(user)
+        return 'Please connect your TransferWise account using /transferwise'
+    else:
+        token = user.getToken()
 
-    if user.encrypted_tw_token is None:
+    if token is None:
         return 'Please connect your TransferWise account using /transferwise'
 
     borderless = getBorderlessAccountId(
