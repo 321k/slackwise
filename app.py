@@ -507,6 +507,8 @@ def lastest():
     print(response_url)
     slack_id = request.form.get('user_id')
     user = User.query.filter_by(slack_id=slack_id).first()
+    if user is None:
+        return 'Please use /transferwise to connect your TransferWise account'
 
     profileId = user.transferwise_profile_id
     if profileId is None or user is None:
