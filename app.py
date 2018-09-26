@@ -170,7 +170,12 @@ def oauth():
     user = User.query.filter_by(slack_id=slack_id).first()
 
     if user is None:
-        return 'Make sure you use the TransferWise bot from Slack.'
+    flash(
+        'That didn\'t work.\
+ Make sure you connect your account by using /transferwise from within Slack.',
+        'alert-success'
+    )
+        return render_template('index.html')
 
     user.addEncryptedToken(token)
     user.transferwise_profile_id = profileId
