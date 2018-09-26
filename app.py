@@ -168,6 +168,10 @@ def oauth():
     profileId = json.loads(profiles.text)[0]['id']
     homeCurrency = decide_user_home_currency(token, profileId)
     user = User.query.filter_by(slack_id=slack_id).first()
+
+    if user is None:
+        return 'Make sure you use the TransferWise bot from Slack.'
+
     user.addEncryptedToken(token)
     user.transferwise_profile_id = profileId
     user.home_currency = homeCurrency
