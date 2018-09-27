@@ -116,8 +116,8 @@ def oauth():
         'redirect_uri=https://slackwise.herokuapp.com/oauth'
 
     if request.referrer != referrer_url:
-        message = 'Authentication failed. \
-        Make sure you use connect the bot from Slack.'
+        message = 'Authentication failed.\
+ Make sure you use connect the bot from Slack.'
         flash(message, 'alert-warning')
         return render_template('index.html')
 
@@ -136,8 +136,8 @@ def oauth():
             slack_id = request_session['slack_id']
 
     else:
-        message = 'Couldn\'t find a Slack user. \
-        Make sure you connect via Slack using /transferwise.'
+        message = 'Couldn\'t find a Slack user.\
+ Make sure you connect via Slack using /transferwise.'
         flash(message, 'alert-warning')
         return redirect(url_for('index'))
 
@@ -616,7 +616,10 @@ def addToken():
 
 @app.route('/slack')
 def slack():
-    return 'ok'
+    message = 'TransferWise is now available from Slack.\
+ Use /transferwise from within slack to complete connection.'
+    flash(message, 'alert-warning')
+    return render_template('index.html')
 
 
 if __name__ == '__main__':
