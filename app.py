@@ -613,9 +613,6 @@ def addToken():
         db.session.commit()
         return 'Token added or updated to existing user'
 
-app.route('/conversation', methods=['POST'])
-def conversation():
-    
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=port)
