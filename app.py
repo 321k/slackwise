@@ -618,7 +618,7 @@ def addToken():
 def slack():
     message = 'TransferWise is now available from Slack.\
  Use /transferwise from within slack to complete connection.'
-    flash(message, 'alert-warning')
+    flash(message, 'alert-success')
     return render_template('index.html')
 
 
