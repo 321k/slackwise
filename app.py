@@ -617,7 +617,7 @@ def addToken():
 
 @app.route('/slack')
 def slack():
-    code = request.params.get('code')
+    code = request.form.get('code')
     payload = {
         'client_id': '387079239778.387986429910',
         'client_secret': '',
