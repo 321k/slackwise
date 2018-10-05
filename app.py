@@ -22,6 +22,7 @@ global is_prod
 # Environment variables
 is_prod = os.environ.get('IS_HEROKU', None)
 slack_token = os.environ.get('SLACK_TOKEN', None)
+slack_client_secret = os.environ.get('SLACK_CLIENT_SECRET', None)
 port = int(os.environ.get('PORT', 5000))
 
 encryption_key = os.environ.get('ENCRYPTION_KEY',
@@ -616,6 +617,17 @@ def addToken():
 
 @app.route('/slack')
 def slack():
+    code = request.params.get('code')
+    payload = {
+        'client_id': '387079239778.387986429910',
+        'client_secret': '',
+        'code': str(code),
+        'redirect_url': 'https://slackwise.herokuapp.com/slack'
+    }
+
+    respose = requests.post('https://slack.com/api/oauth.access',
+                            data=payload)
+    print(respose)
     message = 'TransferWise is now available from Slack.\
  Use /transferwise from within slack to complete connection.'
     flash(message, 'alert-success')
