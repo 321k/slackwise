@@ -54,9 +54,9 @@ class User(BaseModel):
         db.DateTime,
         nullable=False,
         default=datetime.utcnow)
-    organsation_id = db.Column(db.Integer,
-                               db.ForeignKey('organisations.id'),
-                               nullable=True)
+    organisation_id = db.Column(db.Integer,
+                                db.ForeignKey('organisations.id'),
+                                nullable=True)
     organisation = db.relationship('Organisation')
 
     def __init__(self,
