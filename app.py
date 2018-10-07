@@ -297,7 +297,7 @@ def borderless():
         return str(accounts.status_code)
 
     accounts = json.loads(accounts.text)
-    text = "Your balances are \n"
+    text = "Your balances are: \n"
     for b in accounts['balances']:
         currency = str(b['amount']['currency'])
         currency = currency_to_flag(currency)
