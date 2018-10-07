@@ -636,9 +636,9 @@ def slack():
 
     response = requests.post('https://slack.com/api/oauth.access',
                              data=payload)
-    print(response.text['team_id'])
+    print(response.text.team_id)
     org = Organisation.query.filter_by(
-        team_id=response.text['team_id']).first()
+        team_id=response.text.team_id).first()
 
     if org is None:
         org = Organisation(team_id=response.text['team_id'])
