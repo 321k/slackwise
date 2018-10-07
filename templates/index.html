@@ -16,150 +16,185 @@
     </head>
     <body>
 
+
+
         <div class="container-fluid">
+          <div class="jumbotron jumbotron-fluid">
+            <center>
+              <div id="title-text">
+                <h1>SlackWise</h1>
+                <h3>Manage your TransferWise account from Slack.</h3>
+              </div>
 
-              <div class="jumbotron jumbotron-fluid">
-                <center>
-
-                  <div id="title-text">
-                    <h1>SlackWise</h1>
-                    <h3>The TransferWise Slack bot</h3>
-                  </div>
-
-                    <a href="https://slack.com/oauth/authorize?scope=incoming-webhook,commands&client_id=387079239778.387986429910"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>
-                </center>
+              <a href="https://slack.com/oauth/authorize?scope=incoming-webhook,commands&client_id=387079239778.387986429910"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>
+            </center>
+          </div>
+          <div class="row" id="messages">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert {{ category }} flashes" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
             </div>
+          </div>
+          <div class="col-sm-2"></div>
 
-            <div class="row m-4">
+          
+        
+
+          <div class="row" id="getting-started">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8">
+              <h1>Getting started</h1>
+              To start using the Slack bot, make sure you first click <a href="https://slack.com/oauth/authorize?scope=incoming-webhook,commands&client_id=387079239778.387986429910">add to Slack</a>. Then, use the <code>/transferwise</code> command from within Slack to set up the TransferWise integration. Once you are ready with the set-up, try one of the commands below.
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+
+
+          <div class="row" id="available-commands">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8 ">
+              <div class="cards">
+              <h1>Available commands</h1>
+
+              <div class="row">
                 <div class="col">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert {{ category }} flashes" role="alert">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
+                  <div class="card ">
+                    <div class="card-body">
+                      <h5 class="card-title">Balances</h5>
+                      <p class="card-text"><code>/balances</code> shows your TransferWise account balances.</p>
+                      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#balance-modal">
+                      View example
+                      </button>
+                    </div>
+                  </div>
                 </div>
-          </div>
+                <div class="col">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Latest transfers</h5>
+                      <p class="card-text">Use <code>/latest</code> to see the lastest transfers and activity.</p>
 
-          <div class="row m-4">
-              <div class="col">
-                  <p>The TransferWise Slack bot lets you manage your TransferWise account from Slack.</p>
-                  <ul>
-                    <li><a href="#transferwise">Connecting your TransferWise account</a></li>
-                    <li><a href="#latest">Latest activity</a></li>
-                    <li><a href="#balances">Account balances</a></li>
-                    <li><a href="#pay">Pay someone</a></li>
-                    <li><a href="#home-currency">Change your home currency</a></li>
-                    <li><a href="#switch-profile">Switch between profiles</a></li>
-                    <li><a href="#transferwise-bot-feedback">Send feedback</a></li>
-                    <li><a href="/privacy">Privacy policy</a></li>
-                </ul>
-            </div>
-          </div>
-          <div class="row m-4">
-            <div class="col-sm">
-              <h3 id="transferwise">Connect your TransferWise account</h3>
-              /transferwise
-            </div>
-          </div>
-          <div class="row m-4">
-            <div class="col-sm">
-              Once you have added the TransferWise bot to Slack, type in <code>/transferwise</code> on Slack to connect to TransferWise. You will get a link back that lets you connect your TransferWise account. You have to do this before any other commands will work.
-            </div>
-            <div class="col-sm-3">
-            </div>
-          </div>
+                      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#latest-modal">
+                        View example
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Pay someone</h5>
+                      <p class="card-text"><code>/pay</code> <span class="badge badge-primary">email</span> <span class="badge badge-primary">amount</span> <span class="badge badge-primary">currency</span> creates a link that lets you pay someone.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Change home currency</h5>
+                      <p class="card-text"><code>/home-currency</code> <span class="badge badge-primary">currency</span> changes your home currency to any allowed currency.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Switch between profiles</h5>
+                      <p class="card-text">If you have a business profile, you can use this <code>/switch-profile</code> to switch between your personal and business profile.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Give feedback</h5>
+                      <p class="card-text">/transferwise-bot-feedback <span class="badge badge-primary">feedback</span>.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-          <div class="row m-4">
-            <div class="col-sm-3">
-              <h3 id="latest">Latest activity</h3>
-              /latest
-            </div>
-          </div>
-          <div class="row m-4">
-            <div class="col-sm">
-              Use <code>/latest</code> to see the lastest transfers and activity.<br>
-              <img width="400px" src="{{url_for('static', filename='latest.png')}}" />
-            </div>
-          </div>
-          <div class="row m-4">
-            <div class="col-sm-3">
-              <h3 id="balances">See your balances</h3>
-              /balances
-            </div>
-          </div>
-          <div class="row m-4">
-            <div class="col-sm">
-              <code>/balances</code> shows your TransferWise account balances.<br>
-              <img width="400px" src="{{url_for('static', filename='balances.png')}}" />
-            </div>
-            <div class="col-sm-3">
               
+
+              
+
+              
+                       
+              
+
+              
+
+              
+              <div class="col-sm-2"></div>
+
+              </div>
             </div>
           </div>
 
-          <div class="row m-4">
-            <div class="col">
-              <h3 id="pay">Pay someone</h3>
-              /pay <span class="badge badge-primary">email</span> <span class="badge badge-primary">amount</span> <span class="badge badge-primary">currency</span>
-            </div>
-          </div>
-          <div class="row m-4">
-            <div class="col">
-                <code>/pay firstname.lastname@gmail.com 100 EUR</code> creates a payment for 100 EUR. The command returns a link you can use to complete the payment.
-            </div>
-          </div>
-          <div class="row m-4">
-            <div class="col">
-              <h3 id="home-currency">Change your home currency</h3>
-              /home-currency <span class="badge badge-primary">currency</span>
-            </div>
-          </div>
-          <div class="row m-4">
-            <div class="col">
-              <code>/home-currency EUR</code> changes your home currency to any other allowed currency. By default, your home currency is the currency you have the most money in. Leave the currency blank to see your active home currency.
-            </div>
-          </div>
-          <div class="row m-4">
-            <div class="col">
-              <h3 id="switch-profiles">Switch between profiles</h3>
-              /switch-profile
-            </div>
-          </div>
-          <div class="row m-4">
-            <div class="col">
-              If you have a business profile, you can use this <code>/switch-profile</code> to switch between your personal and business profile.
-            </div>
-          </div>
-
-
-          <div class="row m-4">
-            <div class="col">
-              <h3 id="transferwise-bot-feedback">Give feedback</h3>
-              /transferwise-bot-feedback <span class="badge badge-primary">feedback</span>
-            </div>
-          </div>
-          <div class="row m-4">
+          <div class="row" id="welcome">
+            <div class="col-sm-2"></div>
             <div class="col-sm">
-                <p>Send feedback about the bot. <code>/transferwise-bot-feedback please add more features</code>  
+              <span style="float: left;"><a href="https://slack.com/oauth/authorize?scope=incoming-webhook,commands&client_id=387079239778.387986429910"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a></span>
+              <span style="float:right;">
+                <a href="/privacy">Privacy policy</a> | 
+                <a href="twitter.com/321k">Follow me on Twitter</a> |
+                <a href="mailto:erik.edin@transferwise.com">Report a bug</a>
+              </span>
             </div>
+            <div class="col-sm-2"></div>
           </div>
         </div>
-
-         
-         
-
-
-
-
-
 
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
+        <div id="balance-modal" class="modal fade" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Balances</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <img class="modal-image" src="{{url_for('static', filename='balances.png')}}">
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="latest-modal" class="modal fade" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Latest transfers</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <img class="modal-image" src="{{url_for('static', filename='latest.png')}}">
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
     </body>
 </html>
+
+

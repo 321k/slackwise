@@ -22,6 +22,7 @@
   text-shadow: black 0.1em 0.1em 0.1em;
 
 
+
 }
 
 
@@ -29,4 +30,42 @@
 	padding-top:50px;
 	padding-bottom:80px;
 
+}
+
+.card{
+	min-height:15rem;
+	width: 15rem;
+	margin:5px;
+
+}
+
+.cards{
+	 margin-left:auto;
+    margin-right:auto;
+}
+
+.modal-image{
+	width:100%;
+}
+
+h1{
+	text-align:center;
+}
+
+#messages{
+	background-color: #F0F0F0;
+}
+
+#welcome{
+	background-color: white;
+	padding:10px;
+
+}
+#getting-started{
+	background-color: white;
+	padding:30px;
+}
+
+#available-commands{
+	background-color: #F5F5F5;
 }
