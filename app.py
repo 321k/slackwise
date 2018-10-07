@@ -1,10 +1,10 @@
-from model import db, User
+from model import db, User, Organisation
 import time
 import os
 import requests
 import json
 import base64
-from flask import Flask, \
+from flask import Flask, current_app, \
     render_template, url_for, request, redirect, session, flash, make_response
 from slackwise_functions import verify_slack_request, \
     currency_to_flag, print_balance_activity, get_latest_borderless_activity, \
@@ -16,8 +16,10 @@ from tasks import make_celery
 
 # Declare global variables
 global slack_token
+global slack_client_secret
 global encryption_key
 global is_prod
+
 
 # Environment variables
 is_prod = os.environ.get('IS_HEROKU', None)
@@ -73,6 +75,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
 db.init_app(app)
 
 port = int(os.environ.get('PORT', 5000))
+
+
+@app.route('/debug')
+def debug():
+    assert current_app.debug == False, "Don't panic! You're here by request of debug()"
 
 
 @celery.task(name='app.reverse')
@@ -617,17 +624,21 @@ def addToken():
 
 @app.route('/slack')
 def slack():
+    global slack_client_secret
     code = request.form.get('code')
     payload = {
         'client_id': '387079239778.387986429910',
-        'client_secret': '',
+        'client_secret': slack_client_secret,
         'code': str(code),
         'redirect_url': 'https://slackwise.herokuapp.com/slack'
     }
 
-    respose = requests.post('https://slack.com/api/oauth.access',
-                            data=payload)
-    print(respose)
+    response = requests.post('https://slack.com/api/oauth.access',
+                             data=payload)
+    print(response)
+    print(response.team_name)
+    print(response.access_token)
+
     message = 'TransferWise is now available from Slack.\
  Use /transferwise from within slack to complete connection.'
     flash(message, 'alert-success')
