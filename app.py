@@ -627,18 +627,17 @@ def slack():
     global slack_client_secret
     code = request.form.get('code')
     print(code)
-    #payload = {
-    #    'client_id': '387079239778.387986429910',
-    #    'client_secret': slack_client_secret,
-    #    'code': str(code),
-    #    'redirect_url': 'https://slackwise.herokuapp.com/slack'
-    #}
-#
-    #response = requests.post('https://slack.com/api/oauth.access',
-    #                         data=payload)
-    #print(response)
-    #print(response.team_name)
-    #print(response.access_token)
+    payload = {
+        'client_id': '387079239778.387986429910',
+        'client_secret': slack_client_secret,
+        'code': str(code),
+        'redirect_url': 'https://slackwise.herokuapp.com/slack'
+    }
+
+    response = requests.post('https://slack.com/api/oauth.access',
+                             data=payload)
+    print(response)
+    print(response.text)
 
     message = 'TransferWise is now available from Slack.\
  Use /transferwise from within slack to complete connection.'
