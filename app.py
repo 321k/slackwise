@@ -643,7 +643,7 @@ def slack():
 
     if org is None:
         org = Organisation(team_id=response['team_id'])
-        org.addEncryptedToken(response.text['access_token'])
+        org.addEncryptedToken(response['access_token'])
         db.session.add(org)
         db.session.commit()
         message = 'TransferWise is now available from Slack.\
