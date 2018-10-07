@@ -657,11 +657,16 @@ def slack():
         user = User(slack_id=response['user_id'], organisation=org)
         db.session.add(user)
         db.session.commit()
-
+    elif user.organisation is None:
+        user.organisation = org
+        db.session.commit()
     elif user.organisation.team_id != response['team_id']:
         user = User(slack_id=response['user_id'], organisation=org)
         db.session.add(user)
         db.session.commit()
+    else:
+        message = 'The Slack bot is already installed and the user is\
+ connected.'
 
     flash(message, 'alert-success')
     return render_template('index.html')
