@@ -648,10 +648,15 @@ def slack():
         db.session.commit()
         message = 'TransferWise is now available from Slack.\
  Use /transferwise from within slack to complete connection.'
-    flash(message, 'alert-success')
-
-    if org is not None:
+    else:
         message = 'The Slack bot is already installed.'
+
+    user = User.query.filter_by(slack_id=response['user_id']).first()
+
+    if (user is None) or (user.organisation.team_id != response['team_id']):
+        user = User(slack_id=response['user_id'], organisation=org)
+        db.session.add(user)
+        db.session.commit()
 
     flash(message, 'alert-success')
     return render_template('index.html')
