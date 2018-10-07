@@ -636,11 +636,22 @@ def slack():
 
     response = requests.post('https://slack.com/api/oauth.access',
                              data=payload)
-    print(response)
-    print(response.text)
+    print(response.text['team_id'])
+    org = Organisation.query.filter_by(
+        team_id=response.text['team_id']).first()
 
-    message = 'TransferWise is now available from Slack.\
+    if org is None:
+        org = Organisation(team_id=response.text['team_id'])
+        org.addToken(response.text['access_token'])
+        db.session.add(org)
+        db.session.commit()
+        message = 'TransferWise is now available from Slack.\
  Use /transferwise from within slack to complete connection.'
+    flash(message, 'alert-success')
+
+    if org is not None:
+        message = 'The Slack bot is already installed.'
+
     flash(message, 'alert-success')
     return render_template('index.html')
 
