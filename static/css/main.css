@@ -34,14 +34,12 @@
 
 .card{
 	min-height:15rem;
-	width: 15rem;
+	min-width:15rem;
 	margin:5px;
 
 }
 
 .cards{
-	 margin-left:auto;
-    margin-right:auto;
 }
 
 .modal-image{
