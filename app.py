@@ -665,6 +665,7 @@ def slack():
         db.session.add(user)
         db.session.commit()
     else:
+        user.organisation = org
         message = 'The Slack bot is already installed and the user is\
  connected.'
 
