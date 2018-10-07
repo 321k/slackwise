@@ -626,7 +626,7 @@ def addToken():
 def slack():
     global slack_client_secret
     code = request.form.get('code')
-    print(code)
+    print('Code: ' + str(code))
     payload = {
         'client_id': '387079239778.387986429910',
         'client_secret': slack_client_secret,
