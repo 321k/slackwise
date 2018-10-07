@@ -636,12 +636,13 @@ def slack():
 
     response = requests.post('https://slack.com/api/oauth.access',
                              data=payload)
-    print(response.text.team_id)
+    response = json.loads(response.text)
+    print(response['team_id'])
     org = Organisation.query.filter_by(
-        team_id=response.text.team_id).first()
+        team_id=response['team_id']).first()
 
     if org is None:
-        org = Organisation(team_id=response.text['team_id'])
+        org = Organisation(team_id=response['team_id'])
         org.addToken(response.text['access_token'])
         db.session.add(org)
         db.session.commit()
