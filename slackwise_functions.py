@@ -53,7 +53,7 @@ def verify_slack_request(request):
 
 def currency_to_flag(currency):
     if currency == 'USD':
-        currency = ':flag-us: '
+        currency = ':us: '
     elif currency == 'AUD':
         currency = ':flag-au:'
     elif currency == 'BGN':
@@ -71,7 +71,7 @@ def currency_to_flag(currency):
     elif currency == 'EUR':
         currency = ':flag-eu:'
     elif currency == 'GBP':
-        currency = ':flag-uk:'
+        currency = ':uk:'
     elif currency == 'HKD':
         currency = ':flag-hk:'
     elif currency == 'HRK':
