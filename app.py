@@ -653,7 +653,12 @@ def slack():
 
     user = User.query.filter_by(slack_id=response['user_id']).first()
 
-    if (user is None) or (user.organisation.team_id != response['team_id']):
+    if user is None:
+        user = User(slack_id=response['user_id'], organisation=org)
+        db.session.add(user)
+        db.session.commit()
+
+    elif user.organisation.team_id != response['team_id']:
         user = User(slack_id=response['user_id'], organisation=org)
         db.session.add(user)
         db.session.commit()
