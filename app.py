@@ -622,10 +622,10 @@ def addToken():
         return 'Token added or updated to existing user'
 
 
-@app.route('/slack')
+@app.route('/slack', methods=['GET'])
 def slack():
     global slack_client_secret
-    code = request.form.get('code')
+    code = request.args.get('code')
     print('Code: ' + str(code))
     payload = {
         'client_id': '387079239778.387986429910',
