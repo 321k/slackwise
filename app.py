@@ -630,7 +630,7 @@ def slack():
     payload = {
         'client_id': '387079239778.387986429910',
         'client_secret': slack_client_secret,
-        'code': str(code),
+        'code': code,
         'redirect_url': 'https://slackwise.herokuapp.com/slack'
     }
 
