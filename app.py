@@ -11,7 +11,8 @@ from slackwise_functions import verify_slack_request, \
     decide_user_home_currency
 from transferwiseclient.transferwiseclient import getTransferWiseProfiles, \
     createTransferWiseRecipient, createTransferWiseQuote, createPayment, \
-    getBorderlessAccountId, getBorderlessAccounts, getBorderlessActivity
+    getBorderlessAccountId, getBorderlessAccounts, \
+    getExchangeRate
 from tasks import make_celery
 
 # Declare global variables
@@ -79,7 +80,8 @@ port = int(os.environ.get('PORT', 5000))
 
 @app.route('/debug')
 def debug():
-    assert current_app.debug == False, "Don't panic! You're here by request of debug()"
+    assert current_app.debug is False, "Don't panic!\
+ You're here by request of debug()"
 
 
 @celery.task(name='app.reverse')
@@ -269,12 +271,12 @@ def borderless():
     user = User.query.filter_by(slack_id=slack_id).first()
 
     if user is None:
-        return 'Please connect your TransferWise account using /transferwise'
+        return 'Please connect your TransferWise account using /transferwise.'
     else:
         token = user.getToken()
 
     if token is None:
-        return 'Please connect your TransferWise account using /transferwise'
+        return 'Please connect your TransferWise account using /transferwise.'
 
     borderless = getBorderlessAccountId(
         profileId=user.transferwise_profile_id,
@@ -282,10 +284,10 @@ def borderless():
     )
 
     if borderless.status_code != 200:
-        return 'Please connect your TransferWise account using /transferwise'
+        return 'Please connect your TransferWise account using /transferwise.'
 
     if len(json.loads(borderless.text)) < 1:
-        return 'You need to have a borderless account to use the Slack bot'
+        return 'You need to have a borderless account to use this command.'
 
     borderlessId = json.loads(borderless.text)[0]['id']
     accounts = getBorderlessAccounts(
@@ -536,8 +538,19 @@ def rateAlert():
         return 'Request verification failed'
     text = request.form.get('text')
     slack_id = request.form.get('user_id')
-    print(str(slack_id) + ' triggered rate alert for ' + str(text))
-    return 'Not yet available'
+    user = User.query.filter_by(slack_id=slack_id).first()
+    response = getExchangeRate(access_token=user.getToken(),
+                               source_currency=user.home_currency,
+                               target_currency=text)
+
+    if response.status_code != 200 or user is None:
+        return 'Please use /transferwise to connect your TransferWise account'
+
+    exchange_rate = json.loads(response.text)[0]
+    return 'Rate for ' +\
+        exchange_rate['source'] +\
+        "/" + exchange_rate['target'] +\
+        " is " + str(exchange_rate['rate'])
 
 
 @app.route('/switch-profile', methods=['POST'])

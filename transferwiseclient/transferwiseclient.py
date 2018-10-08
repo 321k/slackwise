@@ -209,3 +209,13 @@ def getTransfers(
                                     accessToken,
                                     'Content-Type': 'application/json'})
         return response
+
+
+def getExchangeRate(access_token, source_currency, target_currency):
+    url_string = "https://api.transferwise.com/v1/rates?source=" +\
+        source_currency + "&target=" + target_currency
+    response = requests.get(url_string,
+                            headers={
+                                'Authorization': 'Bearer ' + access_token,
+                                'Content-Type': 'application/json'})
+    return response
