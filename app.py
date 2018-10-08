@@ -683,5 +683,11 @@ def slack():
     return render_template('index.html')
 
 
+@app.route('/support')
+def support():
+    flash('Send feedback to erik.edin@transferwise.com', 'alert-success')
+    return render_template('index.html')
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=port)
