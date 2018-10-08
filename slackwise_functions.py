@@ -155,7 +155,7 @@ def print_balance_activity(activity):
             if activityType == 'DEPOSIT':
                 activityType = ':moneybag:'
             elif activityType == 'WITHDRAWAL':
-                activityType = ':wave:'
+                activityType = ':arrow_right:'
 
             text += str(currency) + \
                 str(b['amount']['value']) + " " + \

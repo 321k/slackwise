@@ -495,8 +495,8 @@ def home_currency():
     user = User.query.filter_by(slack_id=slack_id).first()
 
     if user is None:
-        return 'Please connect your Slack account first at \
-        slackwise.herokuapp.com'
+        return 'Please connect your Slack account first using \
+ /transferwise'
 
     user.home_currency = home_currency
     db.session.commit()
