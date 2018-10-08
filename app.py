@@ -530,6 +530,16 @@ def lastest():
     return activity
 
 
+@app.route('/rate-alert', methods=['POST'])
+def rateAlert():
+    if not verify_slack_request(request):
+        return 'Request verification failed'
+    text = request.form.get('text')
+    slack_id = request.form.get('user_id')
+    print(str(slack_id) + ' triggered rate alert for ' + str(text))
+    return 'Not yet available'
+
+
 @app.route('/switch-profile', methods=['POST'])
 def profile():
     if not verify_slack_request(request):
