@@ -75,7 +75,7 @@ def currency_to_flag(currency):
     elif currency == 'HKD':
         currency = ':flag-hk:'
     elif currency == 'HRK':
-        currency = ':flag-ia:'
+        currency = ':flag-ua:'
     elif currency == 'HUF':
         currency = ':flag-hu:'
     elif currency == 'ILS':
