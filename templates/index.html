@@ -16,6 +16,18 @@
     </head>
     <body>
 
+          <div class="col">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert {{ category }} flashes" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+          </div>
 
 
         <div class="container-fluid">
@@ -29,24 +41,6 @@
               <a href="https://slack.com/oauth/authorize?scope=incoming-webhook,commands&client_id=387079239778.387986429910"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>
             </center>
           </div>
-          <div class="row" id="messages">
-            <div class="col-sm-2"></div>
-            <div class="col-sm-8">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert {{ category }} flashes" role="alert">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
-            </div>
-          </div>
-          <div class="col-sm-2"></div>
-
-          
-        
 
           <div class="row" id="getting-started">
             <div class="col-sm-2"></div>

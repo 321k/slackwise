@@ -67,3 +67,8 @@ h1{
 #available-commands{
 	background-color: #F5F5F5;
 }
+
+#message{
+	padding:0px;
+	margin:0px;
+}
