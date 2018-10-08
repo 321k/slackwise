@@ -539,18 +539,30 @@ def rateAlert():
     text = request.form.get('text')
     slack_id = request.form.get('user_id')
     user = User.query.filter_by(slack_id=slack_id).first()
+
+    if user is None:
+        return 'Please use /transferwise to connect your TransferWise account'
+
+    if len(text) != 3:
+        return 'The currency has to be a three letter currency code,\
+ such as EUR.'
+
     response = getExchangeRate(access_token=user.getToken(),
                                source_currency=user.home_currency,
                                target_currency=text)
 
-    if response.status_code != 200 or user is None:
-        return 'Please use /transferwise to connect your TransferWise account'
+    if response.status_code != 200:
+        return 'Something went wrong.\
+ Try to reconnect to TransferWise using /transferwise.'
 
     exchange_rate = json.loads(response.text)[0]
-    return 'Rate for ' +\
+
+    response_message = 'Rate for ' +\
         exchange_rate['source'] +\
         "/" + exchange_rate['target'] +\
         " is " + str(exchange_rate['rate'])
+
+    return response_message
 
 
 @app.route('/switch-profile', methods=['POST'])
