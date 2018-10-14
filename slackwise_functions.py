@@ -184,7 +184,7 @@ def get_latest_borderless_activity(profileId, token):
     )
 
     if len(json.loads(borderlessId.text)) < 1:
-        return 'You need to have a borderless account to use the Slack bot'
+        return 'You need a borderless account to use this command'
 
     if borderlessId.status_code != 200:
         return 'Please use /transferwise to connect your TransferWise account'
