@@ -164,7 +164,9 @@ def oauth():
     if response.status_code == 401:
         print('Token exchange failed')
         return json.loads(response.text)['error']
-
+    elif response.status_code == 400:
+        print('Invalid request')
+        return json.loads(response.text)['error']
     else:
         token = json.loads(response.text)['access_token']
 
