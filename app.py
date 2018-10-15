@@ -181,8 +181,8 @@ def oauth():
         user = User(slack_id=slack_id)
         user.addEncryptedToken(token)
         db.session.commit()
-        message = 'To get the most out of the SlackWise bot,\
- make sure you copmlete your TransferWise profile first.\
+        message = 'Account connected. To get the most out of the SlackWise bot,\
+ make sure you complete your TransferWise profile.\
  Go to www.transferwise.com to set up.'
         flash(message, 'alert-warning')
         return render_template('index.html')
