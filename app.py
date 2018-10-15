@@ -180,7 +180,7 @@ def oauth():
     if profiles.text == "[]":
         message = 'You need to complete your TransferWise profile\
  before you can connect it to Slack.\
- <a href="www.transferwise.com">Click here to continue</a>'
+ Go to www.transferwise.com to continue.'
         flash(message, 'alert-danger')
         return render_template('index.html')
 
