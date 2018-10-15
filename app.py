@@ -178,10 +178,13 @@ def oauth():
         return str(json.loads(profiles.text))
 
     if profiles.text == "[]":
-        message = 'You need to complete your TransferWise profile\
- before you can connect it to Slack.\
- Go to www.transferwise.com to continue.'
-        flash(message, 'alert-danger')
+        user = User(slack_id=slack_id)
+        user.addEncryptedToken(token)
+        db.session.commit()
+        message = 'To get the most out of the SlackWise bot,\
+ make sure you copmlete your TransferWise profile first.\
+ Go to www.transferwise.com to set up.'
+        flash(message, 'alert-warning')
         return render_template('index.html')
 
     profileId = json.loads(profiles.text)[0]['id']
@@ -600,6 +603,9 @@ def profile():
         print(str(profiles.status_code))
         return 'That didn\'t work.\
  Please make sure you have connected your account using /transferwise.'
+
+    if(json.loads(profiles.text) == "[]"):
+        return 'Go to www.transferwise.com to complete your profile.'
 
     if(len(json.loads(profiles.text)) == 1):
         return 'You only have one profile.'
