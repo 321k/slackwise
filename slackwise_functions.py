@@ -10,16 +10,19 @@ from Crypto.Cipher import Salsa20
 
 
 def verify_slack_request(request):
+    print("verifying")
     slack_signing_secret = os.environ.get('SLACK_SIGNING_SECRET', None)
     is_prod = os.environ.get('IS_HEROKU', None)
 
     if 'X-Slack-Request-Timestamp' not in request.headers:
-        return 'Error'
+        print("Verification failed")
+        return False
 
     timestamp = request.headers['X-Slack-Request-Timestamp']
 
     if is_prod == 'True' and (time.time() - int(timestamp) > 60 * 5):
-        return 'Error'
+        print("Verification failed")
+        return False
 
     form_data = request.form.to_dict()
     form_string = urllib.parse.urlencode(form_data)
@@ -28,12 +31,9 @@ def verify_slack_request(request):
     message = message.encode('utf-8')
 
     slack_signing_secret = bytes(slack_signing_secret, 'utf-8')
-    my_signature = 'v0=' + \
-        hmac.new(
-            slack_signing_secret,
-            msg=message,
-            digestmod=hashlib.sha256
-        ).hexdigest()
+    my_signature = 'v0=' + hmac.new(slack_signing_secret,
+                                    msg=message,
+                                    digestmod=hashlib.sha256).hexdigest()
 
     slack_signature = request.headers['X-Slack-Signature']
 
@@ -41,8 +41,8 @@ def verify_slack_request(request):
         print("Verification succeeded.")
         return True
     elif is_prod is None:
-        print("Verification failed, \
-            but continuing anyway since this is test environment.")
+        print("Verification failed,\
+ but continuing anyway since this is test environment.")
         return True
     else:
         print("Verification failed")
