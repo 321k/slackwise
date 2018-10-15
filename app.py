@@ -5,9 +5,9 @@ import requests
 import json
 import base64
 from flask import Flask, current_app, \
-    render_template, url_for, request, redirect, session, flash, make_response
+    render_template, url_for, request, redirect, session, flash
 from slackwise_functions import verify_slack_request, \
-    currency_to_flag, print_balance_activity, get_latest_borderless_activity, \
+    currency_to_flag, get_latest_borderless_activity, \
     decide_user_home_currency
 from transferwiseclient.transferwiseclient import getTransferWiseProfiles, \
     createTransferWiseRecipient, createTransferWiseQuote, createPayment, \
@@ -174,6 +174,12 @@ def oauth():
     profiles = getTransferWiseProfiles(access_token=token)
     if profiles.status_code == 401:
         return str(json.loads(profiles.text))
+
+    if profiles.text == "[]":
+        message = 'You need to complete your TransferWise profile\
+ before you can connect it to Slack.'
+        flash(message, 'alert-danger')
+        return render_template('index.html')
 
     profileId = json.loads(profiles.text)[0]['id']
     homeCurrency = decide_user_home_currency(token, profileId)
