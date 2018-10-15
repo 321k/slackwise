@@ -547,8 +547,13 @@ def rateAlert():
         return 'The currency has to be a three letter currency code,\
  such as EUR.'
 
+    if user.home_currency is None:
+        source_currency = 'GBP'
+    else:
+        source_currency = user.home_currency
+
     response = getExchangeRate(access_token=user.getToken(),
-                               source_currency=user.home_currency,
+                               source_currency=source_currency,
                                target_currency=text)
 
     if response.status_code != 200:
