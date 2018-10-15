@@ -3,13 +3,11 @@ import time
 import urllib
 import hmac
 import hashlib
-import base64
-from simplecrypt import encrypt, decrypt
-from transferwiseclient.transferwiseclient import getTransferWiseProfiles, \
-    createTransferWiseRecipient, createTransferWiseQuote, createPayment, \
-    getBorderlessAccountId, getBorderlessAccounts, getBorderlessActivity
+from transferwiseclient.transferwiseclient import getBorderlessAccountId,\
+    getBorderlessAccounts, getBorderlessActivity
 import json
 from Crypto.Cipher import Salsa20
+
 
 def verify_slack_request(request):
     slack_signing_secret = os.environ.get('SLACK_SIGNING_SECRET', None)
@@ -129,12 +127,10 @@ def decrypt_transferwise_token(msg):
                             'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
     secret = secret.encode('utf-8')
 
-    msg_nonce=msg[:8]
-    ciphertext=msg[8:]
+    msg_nonce = msg[:8]
+    ciphertext = msg[8:]
     cipher = Salsa20.new(key=secret, nonce=msg_nonce)
     plaintext = cipher.decrypt(ciphertext)
-    print('decrypt result')
-    print(plaintext)
     return plaintext.decode('utf-8')
 
 
