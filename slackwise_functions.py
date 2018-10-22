@@ -286,13 +286,13 @@ def available_commands():
         {
             'command': '/swith-profile',
             'title': 'Switch between profiles',
-            'description': 'Connect to TransferWise',
+            'description': 'Switch between your personal and business profile on TransferWise',
             'description_html': 'If you have a business profile, you can use this <code>/switch-profile</code> to switch between your personal and business profile.'
         },
         {
             'command': '/transferwise-bot-feedback',
             'title': 'Give feedback',
-            'description': 'Connect to TransferWise',
+            'description': 'Give feedback about the bot',
             'description_html': '<code>/transferwise-bot-feedback</code> <span class="badge badge-primary">feedback</span>.'
         }
     ]
