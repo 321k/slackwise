@@ -263,13 +263,15 @@ def available_commands():
             'command': '/balances',
             'title': 'Balances',
             'description': 'View your TransferWise account balance',
-            'description_html': '<code>/balances</code> shows your TransferWise account balances.'
+            'description_html': '<code>/balances</code> shows your TransferWise account balances.',
+            'button': '#balance-modal'
         },
         {
             'command': '/latest',
             'title': 'Latest transfers',
             'description': 'See your latest transfers and activity',
-            'description_html': 'Use <code>/latest</code> to see the lastest transfers and activity.'
+            'description_html': 'Use <code>/latest</code> to see the lastest transfers and activity.',
+            'button': '#latest-modal'
         },
         {
             'command': '/pay',

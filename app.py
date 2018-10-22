@@ -110,7 +110,8 @@ def process(name):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    commands = available_commands()
+    return render_template('index.html', commands=commands)
 
 
 @app.route('/privacy')
