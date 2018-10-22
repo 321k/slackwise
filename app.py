@@ -8,7 +8,7 @@ from flask import Flask, current_app, \
     render_template, url_for, request, redirect, session, flash
 from slackwise_functions import verify_slack_request, \
     currency_to_flag, get_latest_borderless_activity, \
-    decide_user_home_currency
+    decide_user_home_currency, available_commands
 from transferwiseclient.transferwiseclient import getTransferWiseProfiles, \
     createTransferWiseRecipient, createTransferWiseQuote, createPayment, \
     getBorderlessAccountId, getBorderlessAccounts, \
@@ -732,6 +732,19 @@ def slack():
 def support():
     flash('Send feedback to erik.edin@transferwise.com', 'alert-success')
     return render_template('index.html')
+
+
+@app.route('/transferwise-commands', methods=['POST'])
+def transferwiseCommands():
+    if not verify_slack_request(request):
+        return 'Request verification failed'
+
+    commands = available_commands()
+    text = 'Available commands: \n'
+    for c in commands:
+        text += c['command'] + "\n" + c['description'] + "\n \n"
+
+    return text
 
 
 if __name__ == '__main__':

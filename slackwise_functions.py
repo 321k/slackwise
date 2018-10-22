@@ -249,3 +249,52 @@ def decide_user_home_currency(token, profileId):
         homeCurrency = 'GBP'
 
     return homeCurrency
+
+
+def available_commands():
+    commands = [
+        {
+            'command': '/transferwise',
+            'title': 'Connect to TransferWise',
+            'description': 'Set up the TransferWise integration',
+            'description_html': 'Use <code>/transferwise</code> to set up the TransferWise integration.'
+        },
+        {
+            'command': '/balances',
+            'title': 'Balances',
+            'description': 'View your TransferWise account balance',
+            'description_html': '<code>/balances</code> shows your TransferWise account balances.'
+        },
+        {
+            'command': '/latest',
+            'title': 'Latest transfers',
+            'description': 'See your latest transfers and activity',
+            'description_html': 'Use <code>/latest</code> to see the lastest transfers and activity.'
+        },
+        {
+            'command': '/pay',
+            'title': 'Pay someone',
+            'description': 'Create a payment to someone\'s email address',
+            'description_html': '<code>/pay</code> <span class="badge badge-primary">email</span> <span class="badge badge-primary">amount</span> <span class="badge badge-primary">currency</span> creates a link that lets you pay someone.'
+        },
+        {
+            'command': '/home-currency',
+            'title': 'Change home currency',
+            'description': 'Change your home currency to any allowed currency',
+            'description_html': '<code>/home-currency</code> <span class="badge badge-primary">currency</span> changes your home currency to any allowed currency.'
+        },
+        {
+            'command': '/swith-profile',
+            'title': 'Switch between profiles',
+            'description': 'Connect to TransferWise',
+            'description_html': 'If you have a business profile, you can use this <code>/switch-profile</code> to switch between your personal and business profile.'
+        },
+        {
+            'command': '/transferwise-bot-feedback',
+            'title': 'Give feedback',
+            'description': 'Connect to TransferWise',
+            'description_html': '<code>/transferwise-bot-feedback</code> <span class="badge badge-primary">feedback</span>.'
+        }
+    ]
+
+    return commands
